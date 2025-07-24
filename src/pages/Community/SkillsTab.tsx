@@ -75,7 +75,7 @@ const FilterAccordion: React.FC<FilterAccordionProps> = ({ title, children }) =>
 };
 
 const SkillsTab: React.FC = () => {
-  const [skills, setSkills] = useState<SkillService[]>(mockSkills);
+  const [skills] = useState<SkillService[]>(mockSkills);
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
@@ -122,7 +122,7 @@ const SkillsTab: React.FC = () => {
         <motion.div layout className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <AnimatePresence>
             {skills.map((service) => (
-              <SkillCard key={service.id} service={service} />
+              <SkillCard key={service.id} skill={service} />
             ))}
           </AnimatePresence>
         </motion.div>

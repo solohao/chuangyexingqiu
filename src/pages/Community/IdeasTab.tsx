@@ -81,7 +81,7 @@ const FilterAccordion: React.FC<FilterAccordionProps> = ({ title, children }) =>
 
 
 const IdeasTab: React.FC = () => {
-  const [ideas, setIdeas] = useState<Idea[]>(mockIdeas);
+  const [ideas] = useState<Idea[]>(mockIdeas);
   const [activeSort, setActiveSort] = useState<SortKey>('hot');
 
   const sortOptions: { key: SortKey; label: string; icon: React.ElementType }[] = [

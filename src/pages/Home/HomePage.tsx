@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import MapComponent from '../../components/specialized/MapComponent';
-import FilterPanel from '../../components/common/FilterPanel';
+// import FilterPanel from '../../components/common/FilterPanel';
 import ViewToggleFilterPanel from '../../components/common/ViewToggleFilterPanel';
 import ProjectCard from '../../components/specialized/ProjectCard';
 import Header from '../../components/layout/Header';
-import { Target, Store, Lightbulb, Briefcase, User, MapPin, Bot, Users, Wrench, Code } from 'lucide-react';
+import { Briefcase, User, MapPin, Bot, Users, Wrench, Code } from 'lucide-react';
 
 const mockProjects = [
   { id: '1', title: '智能家居控制APP', type: 'tech', founder: '张三', location: '北京朝阳', position: [116.407526, 39.90403] as [number, number], seeking: '后端开发', image: '/images/projects/smart-home.jpg', description: '一款智能家居控制APP，可以远程控制家中的各种智能设备，包括灯光、温度、安防等系统。', createdAt: '2023-05-15'},
@@ -20,7 +20,7 @@ const hotProjects = mockProjects.slice(0, 3);
 const HomePage: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [hoveredProjectId, setHoveredProjectId] = useState<string | null>(null);
-  const [stats] = useState({ totalProjects: 1234, onlineUsers: 156, weeklyNew: 45 });
+  // const [stats] = useState({ totalProjects: 1234, onlineUsers: 156, weeklyNew: 45 });
   const [filters, setFilters] = useState({ projectType: '', teamSize: '', fundingStage: '' });
   const [viewMode, setViewMode] = useState<'map' | 'grid'>('map');
 
@@ -98,7 +98,7 @@ const HomePage: React.FC = () => {
           <div>
             <h3 className="font-semibold text-gray-800 mb-3">热门项目</h3>
             <ul className="space-y-1">
-              {hotProjects.map((project, index) => (
+              {hotProjects.map((project) => (
                 <li 
                   key={project.id}
                   onMouseEnter={() => setHoveredProjectId(project.id)}

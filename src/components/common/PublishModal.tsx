@@ -69,7 +69,7 @@ const PublishModal: React.FC = () => {
           case 'idea':
             return <CreateIdeaForm onClose={handleClose} />;
           case 'skill':
-            return <CreateSkillForm onClose={handleClose} />;
+            return <CreateSkillForm onClose={handleClose} currentMembershipLevel="free" />;
           case 'request':
             return <CreateRequestForm onClose={handleClose} />;
           default:

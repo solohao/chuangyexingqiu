@@ -9,7 +9,7 @@ interface IdeaCardProps {
 }
 
 const IdeaCard: React.FC<IdeaCardProps> = ({ idea }) => {
-  const voteBalance = idea.upvotes - idea.downvotes;
+  // const voteBalance = idea.upvotes - idea.downvotes;
   const rankIcon =
     idea.rank === 1 ? '🥇' :
     idea.rank === 2 ? '🥈' :
