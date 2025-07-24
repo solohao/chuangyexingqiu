@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Globe } from 'lucide-react'
 import useAuth from '../../hooks/useAuth' // 恢复导入
 
 const RegisterPage: React.FC = () => {
@@ -77,11 +78,9 @@ const RegisterPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link to="/">
-          <img
-            className="mx-auto h-12 w-auto"
-            src="/logo.png"
-            alt="创业星球"
-          />
+          <div className="mx-auto flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full">
+            <Globe className="w-8 h-8 text-primary-600" />
+          </div>
         </Link>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           注册新账户
