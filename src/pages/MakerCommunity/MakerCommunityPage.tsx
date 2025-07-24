@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, MessageCircle, Calendar, Award, Hash, ThumbsUp, Eye, Star, MapPin, User, Clock, ChevronRight, Search, FileText } from 'lucide-react';
+import { Users, MessageCircle, Calendar, Award, Hash, ThumbsUp, Eye, Star, MapPin, User, ChevronRight, Search, FileText } from 'lucide-react';
 
 // 创客展示数据
 interface Maker {
@@ -72,7 +72,7 @@ interface Topic {
 
 const MakerCommunityPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('showcase');
-  
+
   const tabs = [
     { id: 'showcase', name: '创客展示', icon: Users },
     { id: 'discussions', name: '创业讨论', icon: MessageCircle },
@@ -80,7 +80,7 @@ const MakerCommunityPage: React.FC = () => {
     { id: 'achievements', name: '创业成果', icon: Award },
     { id: 'topics', name: '热门话题', icon: Hash },
   ];
-  
+
   // 模拟数据 - 创客展示
   const makers: Maker[] = [
     {
@@ -150,7 +150,7 @@ const MakerCommunityPage: React.FC = () => {
       bio: '天使投资人，关注早期科技创业项目。曾投资20+创业团队，5个项目成功退出。'
     }
   ];
-  
+
   // 模拟数据 - 创业讨论
   const discussions: Discussion[] = [
     {
@@ -224,7 +224,7 @@ const MakerCommunityPage: React.FC = () => {
       excerpt: '去年我的第一个创业项目以失败告终，这里想分享一下我的心路历程和从中学到的宝贵经验...'
     }
   ];
-  
+
   // 模拟数据 - 社区活动
   const events: Event[] = [
     {
@@ -291,7 +291,7 @@ const MakerCommunityPage: React.FC = () => {
       tags: ['心理健康', '压力管理', '创业者']
     }
   ];
-  
+
   // 模拟数据 - 创业成果
   const achievements: Achievement[] = [
     {
@@ -351,7 +351,7 @@ const MakerCommunityPage: React.FC = () => {
       ]
     }
   ];
-  
+
   // 模拟数据 - 热门话题
   const topics: Topic[] = [
     {
@@ -419,7 +419,7 @@ const MakerCommunityPage: React.FC = () => {
       description: '分享社区运营、用户激励和内容生态建设的经验。'
     }
   ];
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -431,7 +431,7 @@ const MakerCommunityPage: React.FC = () => {
           连接创业者，分享经验，共同成长的社区平台
         </p>
       </div>
-      
+
       <div className="mb-6">
         <div className="border-b border-gray-200">
           <nav className="flex -mb-px space-x-8 overflow-x-auto">
@@ -439,22 +439,20 @@ const MakerCommunityPage: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 flex items-center font-medium text-sm border-b-2 whitespace-nowrap ${
-                  activeTab === tab.id
+                className={`py-4 px-1 flex items-center font-medium text-sm border-b-2 whitespace-nowrap ${activeTab === tab.id
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
-                <tab.icon className={`mr-2 h-5 w-5 ${
-                  activeTab === tab.id ? 'text-primary-500' : 'text-gray-400'
-                }`} />
+                <tab.icon className={`mr-2 h-5 w-5 ${activeTab === tab.id ? 'text-primary-500' : 'text-gray-400'
+                  }`} />
                 {tab.name}
               </button>
             ))}
           </nav>
         </div>
       </div>
-      
+
       {/* 创客展示 */}
       {activeTab === 'showcase' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -462,9 +460,9 @@ const MakerCommunityPage: React.FC = () => {
             <div key={maker.id} className="bg-white rounded-lg shadow overflow-hidden">
               <div className="p-6">
                 <div className="flex items-center">
-                  <img 
-                    src={maker.avatar} 
-                    alt={maker.name} 
+                  <img
+                    src={maker.avatar}
+                    alt={maker.name}
                     className="w-16 h-16 rounded-full object-cover border-2 border-primary-100"
                   />
                   <div className="ml-4">
@@ -476,15 +474,15 @@ const MakerCommunityPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <p className="mt-4 text-sm text-gray-600 line-clamp-2">{maker.bio}</p>
-                
+
                 <div className="mt-4">
                   <div className="text-xs font-medium text-gray-500 mb-2">技能标签</div>
                   <div className="flex flex-wrap gap-2">
                     {maker.skills.map((skill, index) => (
-                      <span 
-                        key={index} 
+                      <span
+                        key={index}
                         className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600"
                       >
                         {skill}
@@ -492,7 +490,7 @@ const MakerCommunityPage: React.FC = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between">
                   <div className="flex items-center text-sm text-gray-500">
                     <FileText className="w-4 h-4 mr-1" />
@@ -504,7 +502,7 @@ const MakerCommunityPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-gray-50 px-6 py-3 flex justify-between">
                 <button className="text-sm text-primary-600 font-medium flex items-center">
                   查看详情
@@ -519,7 +517,7 @@ const MakerCommunityPage: React.FC = () => {
           ))}
         </div>
       )}
-      
+
       {/* 创业讨论 */}
       {activeTab === 'discussions' && (
         <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -529,14 +527,14 @@ const MakerCommunityPage: React.FC = () => {
               发起讨论
             </button>
           </div>
-          
+
           <div className="divide-y divide-gray-200">
             {discussions.map(discussion => (
               <div key={discussion.id} className="p-6 hover:bg-gray-50 transition-colors">
                 <div className="flex items-start">
-                  <img 
-                    src={discussion.author.avatar} 
-                    alt={discussion.author.name} 
+                  <img
+                    src={discussion.author.avatar}
+                    alt={discussion.author.name}
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div className="ml-4 flex-1">
@@ -548,20 +546,20 @@ const MakerCommunityPage: React.FC = () => {
                       <span className="mx-2">•</span>
                       <span>{discussion.date}</span>
                     </div>
-                    
+
                     <p className="mt-3 text-gray-600">{discussion.excerpt}</p>
-                    
+
                     <div className="mt-3 flex flex-wrap gap-2">
                       {discussion.tags.map((tag, index) => (
-                        <span 
-                          key={index} 
+                        <span
+                          key={index}
                           className="px-2 py-1 bg-blue-50 text-blue-600 rounded-full text-xs"
                         >
                           #{tag}
                         </span>
                       ))}
                     </div>
-                    
+
                     <div className="mt-4 flex items-center space-x-6 text-sm text-gray-500">
                       <div className="flex items-center">
                         <MessageCircle className="w-4 h-4 mr-1" />
@@ -581,7 +579,7 @@ const MakerCommunityPage: React.FC = () => {
               </div>
             ))}
           </div>
-          
+
           <div className="p-4 border-t border-gray-200 text-center">
             <button className="text-primary-600 font-medium">
               查看更多讨论
@@ -589,7 +587,7 @@ const MakerCommunityPage: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* 社区活动 */}
       {activeTab === 'events' && (
         <div className="space-y-6">
@@ -607,30 +605,29 @@ const MakerCommunityPage: React.FC = () => {
               </button>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map(event => (
               <div key={event.id} className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="h-40 overflow-hidden">
-                  <img 
-                    src={event.image} 
-                    alt={event.title} 
+                  <img
+                    src={event.image}
+                    alt={event.title}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                
+
                 <div className="p-6">
                   <div className="flex items-start justify-between">
                     <h3 className="font-bold text-lg text-gray-900">{event.title}</h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      event.type === 'online' 
-                        ? 'bg-green-100 text-green-600' 
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${event.type === 'online'
+                        ? 'bg-green-100 text-green-600'
                         : 'bg-blue-100 text-blue-600'
-                    }`}>
+                      }`}>
                       {event.type === 'online' ? '线上' : '线下'}
                     </span>
                   </div>
-                  
+
                   <div className="mt-4 space-y-2">
                     <div className="flex items-center text-sm text-gray-600">
                       <Calendar className="w-4 h-4 mr-2 text-gray-400" />
@@ -645,18 +642,18 @@ const MakerCommunityPage: React.FC = () => {
                       <span>主办方: {event.organizer}</span>
                     </div>
                   </div>
-                  
+
                   <div className="mt-4 flex flex-wrap gap-2">
                     {event.tags.map((tag, index) => (
-                      <span 
-                        key={index} 
+                      <span
+                        key={index}
                         className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600"
                       >
                         #{tag}
                       </span>
                     ))}
                   </div>
-                  
+
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <div className="flex justify-between items-center">
                       <div className="text-sm text-gray-600">
@@ -674,7 +671,7 @@ const MakerCommunityPage: React.FC = () => {
               </div>
             ))}
           </div>
-          
+
           <div className="text-center">
             <button className="px-6 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
               查看更多活动
@@ -682,7 +679,7 @@ const MakerCommunityPage: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* 创业成果 */}
       {activeTab === 'achievements' && (
         <div className="space-y-6">
@@ -692,19 +689,19 @@ const MakerCommunityPage: React.FC = () => {
               分享我的成果
             </button>
           </div>
-          
+
           <div className="space-y-6">
             {achievements.map(achievement => (
               <div key={achievement.id} className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-start">
                   <div className="w-16 h-16 flex-shrink-0">
-                    <img 
-                      src={achievement.logo} 
-                      alt={achievement.company} 
+                    <img
+                      src={achievement.logo}
+                      alt={achievement.company}
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  
+
                   <div className="ml-6 flex-1">
                     <div className="flex items-center justify-between">
                       <div>
@@ -715,14 +712,14 @@ const MakerCommunityPage: React.FC = () => {
                           <span className="text-sm text-gray-500">{achievement.date}</span>
                         </div>
                       </div>
-                      
+
                       <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
                         {achievement.milestone}
                       </span>
                     </div>
-                    
+
                     <p className="mt-4 text-gray-600">{achievement.description}</p>
-                    
+
                     <div className="mt-4 grid grid-cols-3 gap-4">
                       {achievement.metrics.map((metric, index) => (
                         <div key={index} className="bg-gray-50 p-3 rounded-lg">
@@ -733,7 +730,7 @@ const MakerCommunityPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between">
                   <div className="flex space-x-2">
                     <button className="flex items-center text-gray-500 hover:text-primary-600">
@@ -749,7 +746,7 @@ const MakerCommunityPage: React.FC = () => {
                       <span>收藏</span>
                     </button>
                   </div>
-                  
+
                   <button className="text-primary-600 font-medium">
                     查看详情
                   </button>
@@ -759,22 +756,22 @@ const MakerCommunityPage: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* 热门话题 */}
       {activeTab === 'topics' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="font-semibold text-xl text-gray-800">热门话题</h3>
             <div className="relative">
-              <input 
-                type="text" 
-                placeholder="搜索话题..." 
+              <input
+                type="text"
+                placeholder="搜索话题..."
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {topics.map(topic => (
               <div key={topic.id} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
@@ -786,9 +783,9 @@ const MakerCommunityPage: React.FC = () => {
                     </span>
                   )}
                 </div>
-                
+
                 <p className="mt-3 text-sm text-gray-600 line-clamp-2">{topic.description}</p>
-                
+
                 <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
                   <div className="flex items-center">
                     <MessageCircle className="w-4 h-4 mr-1" />
@@ -799,7 +796,7 @@ const MakerCommunityPage: React.FC = () => {
                     <span>{topic.followers} 关注者</span>
                   </div>
                 </div>
-                
+
                 <button className="mt-4 w-full py-2 border border-primary-600 text-primary-600 rounded-lg text-sm font-medium hover:bg-primary-50">
                   关注话题
                 </button>

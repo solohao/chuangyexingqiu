@@ -18,6 +18,9 @@ export const PROJECT_TYPE_COLORS = {
   education: '#F59E0B',
   health: '#EF4444',
   finance: '#8B5CF6',
+  social: '#EC4899',
+  culture: '#F97316',
+  other: '#6B7280',
   default: '#6B7280'
 };
 

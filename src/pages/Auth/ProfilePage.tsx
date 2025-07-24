@@ -133,7 +133,6 @@ const ProfilePage: React.FC = () => {
 
   const menuItems = [
     { key: 'info', label: '个人资料', icon: User },
-    { key: 'projects', label: '我的项目', icon: Briefcase },
     { key: 'messages', label: '消息中心', icon: MessageSquare },
     { key: 'preferences', label: '匹配设置', icon: Target },
     { key: 'settings', label: '账户设置', icon: Settings },

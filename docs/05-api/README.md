@@ -60,7 +60,7 @@ apikey: <supabase_anon_key>
 
 ### 🏛️ [社区API](./community-api.md)
 - 创意市场功能
-- 技能市场服务
+- 大师工坊服务
 - 功能需求管理
 - 积分和投票系统
 

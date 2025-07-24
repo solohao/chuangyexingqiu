@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { PROJECT_TYPE_COLORS } from '../../config/amap.config'
 import MapComponent from '../../components/specialized/MapComponent'
+import ProjectActions from '../../components/specialized/ProjectActions'
+import ProjectComments from '../../components/specialized/ProjectComments'
+import ProjectTimeline from '../../components/specialized/ProjectTimeline'
+import TeamSkillsRadar from '../../components/specialized/TeamSkillsRadar'
 
 // 模拟项目数据
 const mockProjects = [
@@ -14,19 +18,53 @@ const mockProjects = [
     founder: '张三',
     foundedAt: '2023-01-15',
     team: [
-      { name: '张三', role: '创始人/CEO', background: '前小米IoT产品经理' },
-      { name: '李明', role: 'CTO', background: '前华为软件工程师' },
-      { name: '王芳', role: '市场总监', background: '10年家电行业营销经验' }
+      { 
+        id: 'member_001',
+        name: '张三', 
+        role: '创始人/CEO', 
+        background: '前小米IoT产品经理，5年智能硬件经验',
+        skills: ['产品管理', '项目管理', 'IoT', '团队管理'],
+        rating: 4.8
+      },
+      { 
+        id: 'member_002',
+        name: '李明', 
+        role: 'CTO', 
+        background: '前华为软件工程师，精通嵌入式开发',
+        skills: ['嵌入式开发', 'C++', 'Python', '系统架构'],
+        rating: 4.9
+      },
+      { 
+        id: 'member_003',
+        name: '王芳', 
+        role: '市场总监', 
+        background: '10年家电行业营销经验',
+        skills: ['市场营销', '渠道管理', '品牌推广', '用户研究'],
+        rating: 4.7
+      }
     ],
+    maxTeamSize: 8,
+    seekingRoles: ['前端工程师', '移动端开发', 'UI设计师', '硬件工程师'],
     funding: {
       stage: '种子轮',
-      raised: '¥100万',
-      seeking: '¥500万',
-      equity: '10%'
+      raised: 100,
+      seeking: 500,
+      equity: 10
+    },
+    progress: {
+      percentage: 65,
+      milestones: [
+        { title: '产品原型设计', completed: true, date: '2024-02-01' },
+        { title: '核心功能开发', completed: true, date: '2024-03-15' },
+        { title: '硬件集成测试', completed: false },
+        { title: 'Beta版本发布', completed: false },
+        { title: '正式产品上线', completed: false }
+      ]
     },
     contact: {
       email: 'contact@smarthome.com',
-      phone: '13800138000'
+      phone: '13800138000',
+      website: 'https://smarthome.com'
     },
     tags: ['物联网', '智能家居', '硬件创新']
   },
@@ -111,6 +149,49 @@ const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const [project, setProject] = useState<any>(null)
   const [loading, setLoading] = useState<boolean>(true)
+  
+  // 互动状态
+  const [isLiked, setIsLiked] = useState(false)
+  const [isBookmarked, setIsBookmarked] = useState(false)
+  const [isFollowing, setIsFollowing] = useState(false)
+  
+  // 评论数据
+  const [comments, setComments] = useState([
+    {
+      id: '1',
+      userId: 'user1',
+      userName: '小明',
+      userAvatar: '',
+      content: '这个想法很不错，我有相关的硬件开发经验，可以聊聊吗？',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      likes: 5,
+      isLiked: false,
+      replies: [
+        {
+          id: '1-1',
+          userId: 'user2',
+          userName: '张三',
+          userAvatar: '',
+          content: '欢迎联系！我们正好需要硬件方面的专家。',
+          createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+          likes: 2,
+          isLiked: false,
+          replies: []
+        }
+      ]
+    },
+    {
+      id: '2',
+      userId: 'user3',
+      userName: '小红',
+      userAvatar: '',
+      content: '市场调研做了吗？竞品分析如何？',
+      createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+      likes: 3,
+      isLiked: false,
+      replies: []
+    }
+  ])
 
   useEffect(() => {
     // 模拟API请求
@@ -125,6 +206,84 @@ const ProjectDetail: React.FC = () => {
 
     fetchProject()
   }, [id])
+
+  // 处理互动操作
+  const handleLike = () => setIsLiked(!isLiked)
+  const handleBookmark = () => setIsBookmarked(!isBookmarked)
+  const handleFollow = () => setIsFollowing(!isFollowing)
+  const handleContact = () => {
+    // 打开联系创始人对话框
+    console.log('联系创始人')
+  }
+  const handleApply = () => {
+    // 打开申请加入团队表单
+    console.log('申请加入团队')
+  }
+  const handleReport = () => {
+    // 打开举报表单
+    console.log('举报项目')
+  }
+
+  // 处理评论操作
+  const handleAddComment = (content: string, parentId?: string) => {
+    const newComment = {
+      id: Date.now().toString(),
+      userId: 'current-user',
+      userName: '当前用户',
+      userAvatar: '',
+      content,
+      createdAt: new Date().toISOString(),
+      likes: 0,
+      isLiked: false,
+      replies: []
+    }
+
+    if (parentId) {
+      // 添加回复
+      setComments(prev => prev.map(comment => {
+        if (comment.id === parentId) {
+          return {
+            ...comment,
+            replies: [...comment.replies, newComment]
+          }
+        }
+        return comment
+      }))
+    } else {
+      // 添加新评论
+      setComments(prev => [newComment, ...prev])
+    }
+  }
+
+  const handleLikeComment = (commentId: string) => {
+    setComments(prev => prev.map(comment => {
+      if (comment.id === commentId) {
+        return {
+          ...comment,
+          isLiked: !comment.isLiked,
+          likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1
+        }
+      }
+      // 处理回复的点赞
+      return {
+        ...comment,
+        replies: comment.replies.map(reply => {
+          if (reply.id === commentId) {
+            return {
+              ...reply,
+              isLiked: !reply.isLiked,
+              likes: reply.isLiked ? reply.likes - 1 : reply.likes + 1
+            }
+          }
+          return reply
+        })
+      }
+    }))
+  }
+
+  const handleDeleteComment = (commentId: string) => {
+    setComments(prev => prev.filter(comment => comment.id !== commentId))
+  }
 
   if (loading) {
     return (
@@ -159,9 +318,10 @@ const ProjectDetail: React.FC = () => {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* 项目主要信息 */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
+          {/* 项目基本信息 */}
           <div className="card mb-8">
             <div className="flex items-center mb-4">
               <h1 className="text-3xl font-bold mr-3">{project.title}</h1>
@@ -194,29 +354,41 @@ const ProjectDetail: React.FC = () => {
                 </span>
               ))}
             </div>
-          </div>
 
-          {/* 团队信息 */}
-          <div className="card mb-8">
-            <h2 className="text-xl font-semibold mb-4">团队成员</h2>
-            <div className="space-y-4">
-              {project.team.map((member: any, index: number) => (
-                <div key={index} className="flex items-start">
-                  <div className="bg-primary-100 text-primary-600 w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                    {member.name.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="font-semibold">{member.name}</div>
-                    <div className="text-sm text-gray-600">{member.role}</div>
-                    <div className="text-sm text-gray-500">{member.background}</div>
-                  </div>
-                </div>
-              ))}
+            {/* 融资信息卡片 */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 p-4 bg-gray-50 rounded-lg">
+              <div className="text-center">
+                <div className="text-lg font-semibold text-gray-900">{project.funding.stage}</div>
+                <div className="text-sm text-gray-500">融资阶段</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-semibold text-green-600">¥{project.funding.raised}万</div>
+                <div className="text-sm text-gray-500">已融资</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-semibold text-blue-600">¥{project.funding.seeking}万</div>
+                <div className="text-sm text-gray-500">目标融资</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-semibold text-purple-600">{project.funding.equity}%</div>
+                <div className="text-sm text-gray-500">出让股权</div>
+              </div>
             </div>
           </div>
 
+          {/* 项目进度时间线 */}
+          <ProjectTimeline progress={project.progress} className="mb-8" />
+
+          {/* 团队技能分析 */}
+          <TeamSkillsRadar 
+            team={project.team}
+            seekingRoles={project.seekingRoles}
+            maxTeamSize={project.maxTeamSize}
+            className="mb-8"
+          />
+
           {/* 项目地图位置 */}
-          <div className="card">
+          <div className="card mb-8">
             <h2 className="text-xl font-semibold mb-4">项目位置</h2>
             <div className="h-80 rounded-lg overflow-hidden">
               <MapComponent 
@@ -226,53 +398,33 @@ const ProjectDetail: React.FC = () => {
               />
             </div>
           </div>
+
+          {/* 项目讨论区 */}
+          <ProjectComments
+            projectId={project.id}
+            comments={comments}
+            onAddComment={handleAddComment}
+            onLikeComment={handleLikeComment}
+            onDeleteComment={handleDeleteComment}
+          />
         </div>
 
         {/* 侧边栏 */}
-        <div>
-          {/* 融资信息 */}
-          <div className="card mb-6">
-            <h2 className="text-xl font-semibold mb-4">融资信息</h2>
-            <div className="space-y-3">
-              <div>
-                <div className="text-gray-600">融资阶段</div>
-                <div className="font-medium">{project.funding.stage}</div>
-              </div>
-              <div>
-                <div className="text-gray-600">已融资金额</div>
-                <div className="font-medium">{project.funding.raised}</div>
-              </div>
-              <div>
-                <div className="text-gray-600">目标融资</div>
-                <div className="font-medium">{project.funding.seeking}</div>
-              </div>
-              <div>
-                <div className="text-gray-600">出让股权</div>
-                <div className="font-medium">{project.funding.equity}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* 联系信息 */}
-          <div className="card mb-6">
-            <h2 className="text-xl font-semibold mb-4">联系方式</h2>
-            <div className="space-y-3">
-              <div>
-                <div className="text-gray-600">邮箱</div>
-                <div className="font-medium">{project.contact.email}</div>
-              </div>
-              <div>
-                <div className="text-gray-600">电话</div>
-                <div className="font-medium">{project.contact.phone}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* 操作按钮 */}
-          <div className="space-y-3">
-            <button className="btn btn-primary w-full">联系创始人</button>
-            <button className="btn w-full border border-gray-300 hover:bg-gray-100">收藏项目</button>
-            <button className="btn w-full border border-gray-300 hover:bg-gray-100">分享项目</button>
+        <div className="lg:col-span-1">
+          {/* 项目操作 */}
+          <div className="sticky top-4">
+            <ProjectActions
+              project={project}
+              isLiked={isLiked}
+              isBookmarked={isBookmarked}
+              isFollowing={isFollowing}
+              onLike={handleLike}
+              onBookmark={handleBookmark}
+              onFollow={handleFollow}
+              onContact={handleContact}
+              onApply={handleApply}
+              onReport={handleReport}
+            />
           </div>
         </div>
       </div>

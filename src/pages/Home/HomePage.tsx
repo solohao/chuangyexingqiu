@@ -78,9 +78,9 @@ const HomePage: React.FC = () => {
               <div className="bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-colors">
                 <div className="flex items-center mb-3">
                   <Wrench className="w-5 h-5 mr-3 text-primary-600" />
-                  <h3 className="font-semibold text-gray-800">技能市场</h3>
+                  <h3 className="font-semibold text-gray-800">大师工坊</h3>
                 </div>
-                <p className="text-sm text-gray-600">发布技能，寻找专业人才</p>
+                <p className="text-sm text-gray-600">汇聚大师级人才，展示专业技能</p>
               </div>
             </Link>
             

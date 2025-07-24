@@ -10,7 +10,7 @@ type CommunityTab = 'ideas' | 'skills' | 'requests' | 'events';
 
 const communityTabs: { id: CommunityTab; label: string; icon: React.ElementType }[] = [
   { id: 'ideas', label: '创意市场', icon: Lightbulb },
-  { id: 'skills', label: '技能市场', icon: Wrench },
+  { id: 'skills', label: '大师工坊', icon: Wrench },
   { id: 'requests', label: '功能需求', icon: Bot },
   { id: 'events', label: '活动中心', icon: Milestone },
 ];

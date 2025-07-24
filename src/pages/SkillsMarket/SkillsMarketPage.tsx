@@ -35,10 +35,10 @@ const SkillsMarketPage: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center">
             <Wrench className="mr-2 h-8 w-8 text-primary-600" />
-            技能市场
+            大师工坊
           </h1>
           <p className="text-gray-600 mt-2">
-            发布您的技能，寻找所需专业人才，促进技能交流与合作
+            汇聚各领域大师级人才，展示专业技能，促进高端合作
           </p>
         </div>
         
@@ -47,7 +47,7 @@ const SkillsMarketPage: React.FC = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索技能..."
+              placeholder="搜索大师技能..."
               className="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -62,7 +62,7 @@ const SkillsMarketPage: React.FC = () => {
             onClick={handleCreateSkill}
           >
             <PlusCircle className="w-5 h-5 mr-2" />
-            发布技能
+            入驻工坊
           </button>
         </div>
       </div>
@@ -136,7 +136,7 @@ const SkillsMarketPage: React.FC = () => {
       
       {/* 提示信息 */}
       <div className="mt-8 bg-blue-50 border border-blue-100 rounded-lg p-4">
-        <h3 className="font-semibold text-blue-800 mb-2">技能市场使用提示</h3>
+        <h3 className="font-semibold text-blue-800 mb-2">大师工坊使用提示</h3>
         <ul className="list-disc pl-5 text-sm text-blue-700 space-y-1">
           <li>基础的发帖问答是免费的</li>
           <li>发布需求和技能寻求合作需要升级会员</li>

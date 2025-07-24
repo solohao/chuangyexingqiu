@@ -12,7 +12,7 @@ const Header = () => {
     { name: '创业项目', path: '/projects', icon: Briefcase },
     { name: '创业Agent', path: '/agent', icon: Bot },
     { name: '创客之家', path: '/maker-community', icon: Users },
-    { name: '技能市场', path: '/skills-market', icon: Wrench },
+    { name: '大师工坊', path: '/skills-market', icon: Wrench },
     { name: '开发中心', path: '/dev-center', icon: Code },
   ]
 
