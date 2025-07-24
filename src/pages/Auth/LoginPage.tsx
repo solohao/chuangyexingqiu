@@ -29,19 +29,27 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setSuccessMessage(null)
 
     try {
+      console.log('开始登录流程:', { email });
+      
       // 恢复实际的登录逻辑
-      const { error: authError } = await login({ email, password })
+      const { user, session, error: authError } = await login({ email, password })
       
       if (authError) {
+        console.error('登录失败:', authError);
         setError(authError.message || '登录失败，请检查您的邮箱和密码')
-      } else {
+      } else if (user && session) {
+        console.log('登录成功:', { userId: user.id, hasSession: !!session });
         // 登录成功后重定向到首页
-        navigate('/')
+        navigate('/', { replace: true })
+      } else {
+        console.warn('登录返回空用户或会话');
+        setError('登录失败，请重试')
       }
     } catch (err) {
-      console.error('登录失败:', err)
+      console.error('登录过程中发生异常:', err)
       setError('登录失败，请检查您的邮箱和密码')
     }
   }

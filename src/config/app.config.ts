@@ -14,7 +14,7 @@ export const APP_CONFIG = {
   // 获取完整的回调URL
   getAuthCallbackUrl: () => {
     const baseUrl = APP_CONFIG.getBaseUrl();
-    return `${baseUrl}/auth/callback`;
+    return `${baseUrl}/#/auth/callback`;
   },
   
   // 应用信息

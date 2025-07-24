@@ -12,10 +12,34 @@ const AuthCallbackPage: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // 获取URL中的认证参数
-        const accessToken = searchParams.get('access_token');
-        const refreshToken = searchParams.get('refresh_token');
-        const type = searchParams.get('type');
+        // 获取URL中的认证参数 - 支持hash和search参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        
+        const accessToken = searchParams.get('access_token') || urlParams.get('access_token') || hashParams.get('access_token');
+        const refreshToken = searchParams.get('refresh_token') || urlParams.get('refresh_token') || hashParams.get('refresh_token');
+        const type = searchParams.get('type') || urlParams.get('type') || hashParams.get('type');
+        const error = searchParams.get('error') || urlParams.get('error') || hashParams.get('error');
+        const errorDescription = searchParams.get('error_description') || urlParams.get('error_description') || hashParams.get('error_description');
+        
+        console.log('Auth callback params:', { type, hasAccessToken: !!accessToken, hasRefreshToken: !!refreshToken, error });
+        
+        if (error) {
+          console.error('Auth callback error:', error, errorDescription);
+          setStatus('error');
+          let friendlyMessage = '验证失败';
+          
+          if (error === 'access_denied') {
+            friendlyMessage = '访问被拒绝，请重新注册';
+          } else if (error.includes('expired') || errorDescription?.includes('expired')) {
+            friendlyMessage = '验证链接已过期，请重新注册';
+          } else if (errorDescription) {
+            friendlyMessage = decodeURIComponent(errorDescription);
+          }
+          
+          setMessage(friendlyMessage);
+          return;
+        }
         
         if (type === 'signup' && accessToken && refreshToken) {
           // 设置会话
@@ -39,17 +63,9 @@ const AuthCallbackPage: React.FC = () => {
             }, 3000);
           }
         } else {
-          // 处理其他类型的回调或错误情况
-          const error = searchParams.get('error');
-          const errorDescription = searchParams.get('error_description');
-          
-          if (error) {
-            setStatus('error');
-            setMessage(errorDescription || '验证失败');
-          } else {
-            setStatus('error');
-            setMessage('无效的验证链接');
-          }
+          // 处理其他情况
+          setStatus('error');
+          setMessage('无效的验证链接或参数缺失');
         }
       } catch (error) {
         console.error('处理认证回调时发生错误:', error);

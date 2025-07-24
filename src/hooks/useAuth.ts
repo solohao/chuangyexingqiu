@@ -58,7 +58,9 @@ export function useAuth() {
     // 监听身份验证状态变化
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN') {
+        console.log('Auth state change:', event, !!session);
+        
+        if (event === 'SIGNED_IN' && session) {
           const { user } = await AuthService.getUser();
           setState({
             user,
@@ -75,6 +77,12 @@ export function useAuth() {
             initialized: true,
             isAuthenticated: false
           });
+        } else if (event === 'TOKEN_REFRESHED' && session) {
+          setState(prev => ({
+            ...prev,
+            session,
+            isAuthenticated: true
+          }));
         }
       }
     );
