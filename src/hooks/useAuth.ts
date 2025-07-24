@@ -7,10 +7,13 @@ export function useAuth() {
   const [state, setState] = useState<AuthState>({
     user: null,
     session: null,
-    loading: true,
+    loading: true, // 这个loading用于初始化
     initialized: false,
     isAuthenticated: false
   });
+  
+  // 单独的操作loading状态
+  const [operationLoading, setOperationLoading] = useState(false);
 
   // 初始化身份验证状态
   useEffect(() => {
@@ -86,7 +89,7 @@ export function useAuth() {
 
   // 登录方法
   const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    setState(prev => ({ ...prev, loading: true }));
+    setOperationLoading(true);
     const { user, session, error } = await AuthService.login(credentials);
     
     setState({
@@ -97,12 +100,13 @@ export function useAuth() {
       isAuthenticated: !!session
     });
     
+    setOperationLoading(false);
     return { user, session, error };
   };
 
   // 注册方法
   const register = async (credentials: RegisterCredentials): Promise<AuthResponse> => {
-    setState(prev => ({ ...prev, loading: true }));
+    setOperationLoading(true);
     const { user, session, error } = await AuthService.register(credentials);
     
     setState({
@@ -113,12 +117,13 @@ export function useAuth() {
       isAuthenticated: !!session
     });
     
+    setOperationLoading(false);
     return { user, session, error };
   };
 
   // 登出方法
   const logout = async () => {
-    setState(prev => ({ ...prev, loading: true }));
+    setOperationLoading(true);
     const { error } = await AuthService.logout();
     
     if (!error) {
@@ -129,15 +134,15 @@ export function useAuth() {
         initialized: true,
         isAuthenticated: false
       });
-    } else {
-      setState(prev => ({ ...prev, loading: false }));
     }
     
+    setOperationLoading(false);
     return { error };
   };
 
   return {
     ...state,
+    operationLoading, // 用于按钮状态的loading
     login,
     register,
     logout

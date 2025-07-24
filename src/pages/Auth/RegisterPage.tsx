@@ -12,7 +12,7 @@ const RegisterPage: React.FC = () => {
     agreeTerms: false
   })
   const [error, setError] = useState<string | null>(null)
-  const { register, loading } = useAuth() // 恢复使用
+  const { register, operationLoading } = useAuth() // 使用operationLoading
   const navigate = useNavigate()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,10 +195,10 @@ const RegisterPage: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={loading}
-                className={`w-full btn btn-primary ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                disabled={operationLoading}
+                className={`w-full btn btn-primary ${operationLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                {loading ? '注册中...' : '注册'}
+                {operationLoading ? '注册中...' : '注册'}
               </button>
             </div>
           </form>

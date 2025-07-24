@@ -7,7 +7,7 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const { login, loading } = useAuth() // 使用useAuth中的loading状态
+  const { login, operationLoading } = useAuth() // 使用operationLoading状态
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -117,10 +117,10 @@ const LoginPage: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={loading}
-                className={`w-full btn btn-primary ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                disabled={operationLoading}
+                className={`w-full btn btn-primary ${operationLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                {loading ? '登录中...' : '登录'}
+                {operationLoading ? '登录中...' : '登录'}
               </button>
             </div>
           </form>

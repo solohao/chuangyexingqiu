@@ -9,6 +9,7 @@ export interface AuthState {
 }
 
 export interface AuthContextType extends AuthState {
+  operationLoading: boolean; // 用于按钮状态的loading
   login: (credentials: LoginCredentials) => Promise<AuthResponse>;
   register: (credentials: RegisterCredentials) => Promise<AuthResponse>;
   logout: () => Promise<{ error: any }>;
