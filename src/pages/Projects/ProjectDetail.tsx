@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-// import { PROJECT_TYPE_COLORS } from '../config/amap.config'
-import MapComponent from '../components/specialized/MapComponent'
+import { PROJECT_TYPE_COLORS } from '../../config/amap.config'
+import MapComponent from '../../components/specialized/MapComponent'
 
 // 模拟项目数据
 const mockProjects = [
@@ -220,6 +220,7 @@ const ProjectDetail: React.FC = () => {
             <h2 className="text-xl font-semibold mb-4">项目位置</h2>
             <div className="h-80 rounded-lg overflow-hidden">
               <MapComponent 
+                projects={[project]}
                 center={project.position}
                 zoom={15}
               />

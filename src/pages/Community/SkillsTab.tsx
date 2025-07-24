@@ -122,7 +122,22 @@ const SkillsTab: React.FC = () => {
         <motion.div layout className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <AnimatePresence>
             {skills.map((service) => (
-              <SkillCard key={service.id} skill={service} />
+              <SkillCard key={service.id} skill={{
+                ...service,
+                pricePerHour: service.pricePerDay / 8, // 假设一天8小时
+                featured: false,
+                verified: service.rating > 4.5,
+                category: service.tags[0] || 'other',
+                provider: {
+                  ...service.provider,
+                  id: service.id,
+                  rating: service.rating,
+                  reviewsCount: service.reviewsCount,
+                  membershipLevel: 'free' as const,
+                  responseRate: 95,
+                  responseTime: '2小时内'
+                }
+              }} />
             ))}
           </AnimatePresence>
         </motion.div>

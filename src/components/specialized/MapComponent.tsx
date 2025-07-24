@@ -82,7 +82,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
       const icon = new window.AMap.Icon({
         image: isHovered ? PROJECT_MARKER_STYLE.hover.icon : PROJECT_MARKER_STYLE.normal.icon,
         size: new window.AMap.Size(
-          ...(isHovered ? PROJECT_MARKER_STYLE.hover.size : PROJECT_MARKER_STYLE.normal.size)
+          isHovered ? PROJECT_MARKER_STYLE.hover.size.width : PROJECT_MARKER_STYLE.normal.size.width,
+          isHovered ? PROJECT_MARKER_STYLE.hover.size.height : PROJECT_MARKER_STYLE.normal.size.height
         ),
         imageOffset: new window.AMap.Pixel(0, 0),
       });

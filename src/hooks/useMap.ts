@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-// import { PROJECT_MARKER_STYLE } from '../config/amap.config'
+import { PROJECT_MARKER_STYLE } from '../config/amap.config'
 
 interface UseMapOptions {
   map: any | null

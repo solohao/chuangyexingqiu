@@ -1,71 +1,69 @@
 import React, { useState } from 'react';
-import { Plus, ThumbsUp, MessageCircle, Clock } from 'lucide-react';
-import Button from '../../components/ui/Button';
-import Modal from '../../components/ui/Modal';
+import { Plus } from 'lucide-react';
+// import Button from '../../components/ui/Button';
+// import Modal from '../../components/ui/Modal';
 import CreateRequestForm from '../../components/specialized/CreateRequestForm';
 import FeatureRequestCard from '../../components/specialized/FeatureRequestCard';
+import { FeatureRequest } from '../../types/devcenter.types';
 
-interface FeatureRequest {
-  id: string;
-  title: string;
-  description: string;
-  author: string;
-  votes: number;
-  comments: number;
-  status: 'pending' | 'in-progress' | 'completed' | 'rejected';
-  createdAt: string;
-  tags: string[];
-}
+// 使用从 devcenter.types 导入的 FeatureRequest 类型
 
 const mockFeatures: FeatureRequest[] = [
   {
     id: '1',
     title: '添加项目协作看板功能',
     description: '希望能够添加类似Trello的看板功能，方便团队协作管理任务',
-    author: '张三',
-    votes: 23,
-    comments: 8,
-    status: 'in-progress',
+    points: 23,
+    commentsCount: 8,
+    status: '开发中',
     createdAt: '2024-01-20',
-    tags: ['协作', '项目管理']
+    tags: ['协作', '项目管理'],
+    submitter: { name: '张三', avatarUrl: '/default-avatar.png' }
   },
   {
     id: '2',
     title: '支持视频通话功能',
     description: '在聊天系统中集成视频通话功能，方便远程沟通',
-    author: '李四',
-    votes: 18,
-    comments: 5,
-    status: 'pending',
+    points: 18,
+    commentsCount: 5,
+    status: '待评估',
     createdAt: '2024-01-19',
-    tags: ['通信', '视频']
+    tags: ['通信', '视频'],
+    submitter: { name: '李四', avatarUrl: '/default-avatar.png' }
   }
 ];
 
 const FeaturesTab: React.FC = () => {
-  const [features, setFeatures] = useState<FeatureRequest[]>(mockFeatures);
+  const [features] = useState<FeatureRequest[]>(mockFeatures);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [filter, setFilter] = useState<'all' | 'pending' | 'in-progress' | 'completed'>('all');
 
+  const statusMap = {
+    'all': 'all',
+    'pending': '待评估',
+    'in-progress': '开发中',
+    'completed': '已完成'
+  } as const;
+
   const filteredFeatures = features.filter(feature => 
-    filter === 'all' || feature.status === filter
+    filter === 'all' || feature.status === statusMap[filter]
   );
 
-  const handleCreateFeature = (data: any) => {
-    const newFeature: FeatureRequest = {
-      id: Date.now().toString(),
-      title: data.title,
-      description: data.description,
-      author: '当前用户',
-      votes: 0,
-      comments: 0,
-      status: 'pending',
-      createdAt: new Date().toISOString().split('T')[0],
-      tags: data.tags || []
-    };
-    setFeatures(prev => [newFeature, ...prev]);
-    setShowCreateModal(false);
-  };
+  // const handleCreateFeature = (data: any) => {
+  //   const newFeature: FeatureRequest = {
+  //     id: Date.now().toString(),
+  //     title: data.title,
+  //     description: data.description,
+  //     author: '当前用户',
+  //     votes: 0,
+  //     comments: 0,
+  //     status: 'pending',
+  //     createdAt: new Date().toISOString().split('T')[0],
+  //     tags: data.tags || []
+  //   };
+  //   setFeatures(prev => [newFeature, ...prev]);
+  //   setShowCreateModal(false);
+  // };
 
   return (
     <div className="space-y-6">
@@ -89,13 +87,13 @@ const FeaturesTab: React.FC = () => {
           ))}
         </div>
         
-        <Button
+        <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center space-x-2"
+          className="btn btn-primary flex items-center space-x-2"
         >
           <Plus className="w-4 h-4" />
           <span>提交需求</span>
-        </Button>
+        </button>
       </div>
 
       {/* 功能需求列表 */}
@@ -103,27 +101,22 @@ const FeaturesTab: React.FC = () => {
         {filteredFeatures.map(feature => (
           <FeatureRequestCard
             key={feature.id}
-            request={feature}
-            onVote={() => {
-              setFeatures(prev => prev.map(f => 
-                f.id === feature.id ? { ...f, votes: f.votes + 1 } : f
-              ));
-            }}
+            {...feature}
           />
         ))}
       </div>
 
       {/* 创建需求模态框 */}
-      <Modal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        title="提交功能需求"
-      >
-        <CreateRequestForm
-          onSubmit={handleCreateFeature}
-          onCancel={() => setShowCreateModal(false)}
-        />
-      </Modal>
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">提交功能需求</h3>
+            <CreateRequestForm
+              onClose={() => setShowCreateModal(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
