@@ -43,7 +43,7 @@ const LoginPage: React.FC = () => {
       console.log('开始登录流程:', { username });
       
       // 使用用户名登录（转换为临时邮箱格式）
-      const tempEmail = `${username}@hackathon.temp`;
+      const tempEmail = `${username}@example.com`;
       const { user, session, error: authError } = await login({ 
         email: tempEmail, 
         password 

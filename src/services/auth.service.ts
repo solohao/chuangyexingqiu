@@ -17,8 +17,8 @@ export class AuthService {
       
       const { username, password, full_name } = credentials;
       
-      // 使用用户名生成临时邮箱格式，避免邮件验证
-      const tempEmail = `${username}@hackathon.temp`;
+      // 使用用户名生成有效的临时邮箱格式，避免邮件验证
+      const tempEmail = `${username}@example.com`;
       
       const { data, error } = await supabase.auth.signUp({
         email: tempEmail,
