@@ -30,7 +30,7 @@ const Header = () => {
     <header className="bg-white shadow-sm sticky top-0 z-20">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <img src="/favicon.svg" alt="创业星球" className="w-8 h-8" />
+          <img src="/logo.png" alt="创业星球" className="w-8 h-8" />
           <Link to="/" className="text-xl font-bold text-gray-900">创业星球</Link>
         </div>
 

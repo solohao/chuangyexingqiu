@@ -35,7 +35,7 @@ const LoginPage: React.FC = () => {
         <Link to="/">
           <img
             className="mx-auto h-12 w-auto"
-            src="/favicon.svg"
+            src="/logo.png"
             alt="创业星球"
           />
         </Link>
