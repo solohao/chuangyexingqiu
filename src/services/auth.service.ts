@@ -1,51 +1,69 @@
 import { supabase } from '../config/supabase.config';
-import { APP_CONFIG } from '../config/app.config';
 import { AuthError, Session, User } from '@supabase/supabase-js';
 import { AuthResponse, LoginCredentials, RegisterCredentials } from '../types/auth.types';
 
 export class AuthService {
   /**
-   * 用户注册
+   * 用户注册 - 黑客松简化版本
    * @param credentials 注册凭据
    * @returns 注册结果
    */
   static async register(credentials: RegisterCredentials): Promise<AuthResponse> {
     try {
-      console.log('开始注册流程，准备提交数据:', { 
-        email: credentials.email, 
-        hasPassword: !!credentials.password,
+      console.log('开始简化注册流程:', { 
         username: credentials.username,
-        hasFullName: !!credentials.full_name
+        hasPassword: !!credentials.password
       });
       
-      const { email, password, username, full_name } = credentials;
+      const { username, password, full_name } = credentials;
+      
+      // 使用用户名生成临时邮箱格式，避免邮件验证
+      const tempEmail = `${username}@hackathon.temp`;
       
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: tempEmail,
         password,
         options: {
-          emailRedirectTo: APP_CONFIG.getAuthCallbackUrl(),
+          // 关键：禁用邮件验证
+          emailRedirectTo: undefined,
           data: {
             username,
             full_name: full_name || username,
+            is_temp_email: true, // 标记为临时邮箱
+            registration_type: 'hackathon_simplified'
           },
         },
       });
       
       if (error) {
-        console.error('注册失败，Supabase返回错误:', error);
-      } else {
-        console.log('注册成功，返回数据:', { 
-          userId: data?.user?.id,
-          hasSession: !!data?.session
+        console.error('注册失败:', error);
+        return {
+          user: null,
+          session: null,
+          error,
+        };
+      }
+      
+      console.log('注册成功，准备自动登录:', { 
+        userId: data?.user?.id,
+        hasSession: !!data?.session
+      });
+      
+      // 如果注册成功但没有session（需要邮件验证的情况），立即登录
+      if (data?.user && !data?.session) {
+        console.log('执行自动登录...');
+        return await this.login({
+          email: tempEmail,
+          password
         });
       }
       
       return {
         user: data?.user || null,
         session: data?.session || null,
-        error,
+        error: null,
       };
+      
     } catch (error) {
       console.error('注册过程中发生异常:', error);
       return {

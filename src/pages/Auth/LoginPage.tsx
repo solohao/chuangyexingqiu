@@ -4,7 +4,7 @@ import { Globe } from 'lucide-react'
 import useAuth from '../../hooks/useAuth' // 恢复导入
 
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -40,10 +40,14 @@ const LoginPage: React.FC = () => {
     setSuccessMessage(null)
 
     try {
-      console.log('开始登录流程:', { email });
+      console.log('开始登录流程:', { username });
       
-      // 恢复实际的登录逻辑
-      const { user, session, error: authError } = await login({ email, password })
+      // 使用用户名登录（转换为临时邮箱格式）
+      const tempEmail = `${username}@hackathon.temp`;
+      const { user, session, error: authError } = await login({ 
+        email: tempEmail, 
+        password 
+      })
       
       if (authError) {
         console.error('登录失败:', authError);
@@ -81,6 +85,13 @@ const LoginPage: React.FC = () => {
             注册新账户
           </Link>
         </p>
+        
+        {/* 黑客松提醒 */}
+        <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
+          <p className="text-sm text-green-700 text-center">
+            💡 使用注册时的用户名和密码登录即可
+          </p>
+        </div>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -99,19 +110,20 @@ const LoginPage: React.FC = () => {
           
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                邮箱地址
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                用户名
               </label>
               <div className="mt-1">
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
+                  id="username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="input"
+                  placeholder="请输入注册时的用户名"
                 />
               </div>
             </div>

@@ -6,7 +6,6 @@ import useAuth from '../../hooks/useAuth' // 恢复导入
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
     username: '',
-    email: '',
     password: '',
     confirmPassword: '',
     agreeTerms: false
@@ -39,17 +38,15 @@ const RegisterPage: React.FC = () => {
     }
 
     try {
-      console.log('提交注册表单:', { 
-        email: formData.email, 
+      console.log('提交简化注册表单:', { 
         username: formData.username,
         passwordLength: formData.password.length 
       });
       
-      // 恢复实际的注册逻辑
-      const { error: authError } = await register({
-        email: formData.email,
-        password: formData.password,
-        username: formData.username
+      // 简化注册逻辑
+      const { user, session, error: authError } = await register({
+        username: formData.username,
+        password: formData.password
       })
       
       if (authError) {
@@ -57,18 +54,22 @@ const RegisterPage: React.FC = () => {
         let errorMessage = authError.message || '注册失败，请稍后再试';
         
         // 针对常见错误提供更友好的提示
-        if (errorMessage.includes('email')) {
-          errorMessage = '邮箱格式不正确或已被注册';
+        if (errorMessage.includes('User already registered')) {
+          errorMessage = '用户名已被注册，请选择其他用户名';
         } else if (errorMessage.includes('password')) {
           errorMessage = '密码不符合要求，请确保密码长度至少为6位';
         }
         
         setError(errorMessage);
+      } else if (user && session) {
+        // 注册成功且已自动登录，直接跳转首页
+        console.log('注册并登录成功，跳转首页');
+        navigate('/', { replace: true });
       } else {
-        // 注册成功，显示邮箱验证提示
+        // 注册成功但未登录，跳转登录页
         navigate('/login', { 
           state: { 
-            message: '注册成功！请检查您的邮箱并点击验证链接完成注册。',
+            message: '注册成功！请使用用户名和密码登录。',
             type: 'success'
           } 
         });
@@ -96,6 +97,13 @@ const RegisterPage: React.FC = () => {
             立即登录
           </Link>
         </p>
+        
+        {/* 黑客松提醒 */}
+        <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p className="text-sm text-blue-700 text-center">
+            🚀 黑客松快速体验模式：无需邮件验证，注册即可使用！
+          </p>
+        </div>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -125,23 +133,7 @@ const RegisterPage: React.FC = () => {
               </div>
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                邮箱地址
-              </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="input"
-                />
-              </div>
-            </div>
+
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">

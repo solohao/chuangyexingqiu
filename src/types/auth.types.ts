@@ -21,7 +21,7 @@ export interface LoginCredentials {
 }
 
 export interface RegisterCredentials {
-  email: string;
+  email?: string; // 可选，用于简化注册
   password: string;
   username: string;
   full_name?: string;
