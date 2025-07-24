@@ -8,7 +8,7 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
-  const { login, operationLoading } = useAuth() // 使用operationLoading状态
+  const { login, operationLoading, isAuthenticated, user } = useAuth() // 使用operationLoading状态
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -26,6 +26,14 @@ const LoginPage: React.FC = () => {
     }
   }, [location])
 
+  // 监听认证状态，如果已经登录则自动跳转
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log('检测到用户已登录，自动跳转到首页:', { userId: user.id });
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, user, navigate])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -41,9 +49,11 @@ const LoginPage: React.FC = () => {
         console.error('登录失败:', authError);
         setError(authError.message || '登录失败，请检查您的邮箱和密码')
       } else if (user && session) {
-        console.log('登录成功:', { userId: user.id, hasSession: !!session });
-        // 登录成功后重定向到首页
-        navigate('/', { replace: true })
+        console.log('登录成功，准备跳转:', { userId: user.id, hasSession: !!session });
+        // 使用 setTimeout 确保状态更新完成后再跳转
+        setTimeout(() => {
+          navigate('/', { replace: true })
+        }, 100);
       } else {
         console.warn('登录返回空用户或会话');
         setError('登录失败，请重试')

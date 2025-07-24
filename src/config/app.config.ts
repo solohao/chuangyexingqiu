@@ -10,20 +10,20 @@ export const APP_CONFIG = {
       return window.location.origin;
     }
   },
-  
+
   // 获取完整的回调URL
   getAuthCallbackUrl: () => {
     const baseUrl = APP_CONFIG.getBaseUrl();
     return `${baseUrl}/#/auth/callback`;
   },
-  
+
   // 应用信息
   app: {
     name: '创业星球',
     description: '连接独立创业者的智能匹配平台',
     version: '0.1.0',
   },
-  
+
   // 环境信息
   env: {
     isDev: import.meta.env.DEV,

@@ -12,9 +12,23 @@ const AuthCallbackPage: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // 获取URL中的认证参数 - 支持hash和search参数
+        // 获取URL中的认证参数 - 处理HashRouter的特殊情况
+        const fullHash = window.location.hash;
+        console.log('Full URL hash:', fullHash);
+        
+        // 解析hash中的参数，可能格式为: #/auth/callback#access_token=...&type=...
+        let paramString = '';
+        if (fullHash.includes('#access_token=') || fullHash.includes('#error=')) {
+          // 参数在第二个#后面
+          const parts = fullHash.split('#');
+          paramString = parts[parts.length - 1];
+        } else if (fullHash.includes('?')) {
+          // 参数在?后面
+          paramString = fullHash.split('?')[1];
+        }
+        
+        const hashParams = new URLSearchParams(paramString);
         const urlParams = new URLSearchParams(window.location.search);
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
         
         const accessToken = searchParams.get('access_token') || urlParams.get('access_token') || hashParams.get('access_token');
         const refreshToken = searchParams.get('refresh_token') || urlParams.get('refresh_token') || hashParams.get('refresh_token');
@@ -22,7 +36,14 @@ const AuthCallbackPage: React.FC = () => {
         const error = searchParams.get('error') || urlParams.get('error') || hashParams.get('error');
         const errorDescription = searchParams.get('error_description') || urlParams.get('error_description') || hashParams.get('error_description');
         
-        console.log('Auth callback params:', { type, hasAccessToken: !!accessToken, hasRefreshToken: !!refreshToken, error });
+        console.log('Auth callback params:', { 
+          type, 
+          hasAccessToken: !!accessToken, 
+          hasRefreshToken: !!refreshToken, 
+          error,
+          errorDescription,
+          paramString 
+        });
         
         if (error) {
           console.error('Auth callback error:', error, errorDescription);
