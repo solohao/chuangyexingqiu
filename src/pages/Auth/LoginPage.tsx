@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Globe } from 'lucide-react'
 import useAuth from '../../hooks/useAuth' // 恢复导入
 
@@ -7,8 +7,24 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const { login, operationLoading } = useAuth() // 使用operationLoading状态
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // 检查是否有来自注册页面的消息
+  useEffect(() => {
+    const state = location.state as { message?: string; type?: string } | null;
+    if (state?.message) {
+      if (state.type === 'success') {
+        setSuccessMessage(state.message);
+      } else {
+        setError(state.message);
+      }
+      // 清除location state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,6 +67,12 @@ const LoginPage: React.FC = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {successMessage && (
+            <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+              {successMessage}
+            </div>
+          )}
+          
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
               {error}

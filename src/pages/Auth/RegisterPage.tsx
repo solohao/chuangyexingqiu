@@ -65,8 +65,13 @@ const RegisterPage: React.FC = () => {
         
         setError(errorMessage);
       } else {
-        // 注册成功后重定向到登录页面
-        navigate('/login', { state: { message: '注册成功，请登录您的账户' } })
+        // 注册成功，显示邮箱验证提示
+        navigate('/login', { 
+          state: { 
+            message: '注册成功！请检查您的邮箱并点击验证链接完成注册。',
+            type: 'success'
+          } 
+        });
       }
     } catch (err) {
       console.error('注册过程中发生异常:', err)

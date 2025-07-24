@@ -20,6 +20,7 @@ const DevCenterPage = lazy(() => import('./pages/DevCenter/DevCenterPage'))
 const CommunityLayout = lazy(() => import('./pages/Community/CommunityLayout'))
 const LoginPage = lazy(() => import('./pages/Auth/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/Auth/RegisterPage'))
+const AuthCallbackPage = lazy(() => import('./pages/Auth/AuthCallbackPage'))
 const ProfilePage = lazy(() => import('./pages/Auth/ProfilePage'))
 const EditProfilePage = lazy(() => import('./pages/Auth/EditProfilePage.tsx'))
 
@@ -45,6 +46,7 @@ function AppLayout() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
             
             {/* 新增的主导航路由 */}
             <Route path="/projects" element={<ProjectsPage />} />

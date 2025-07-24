@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabase.config';
+import { APP_CONFIG } from '../config/app.config';
 import { AuthError, Session, User } from '@supabase/supabase-js';
 import { AuthResponse, LoginCredentials, RegisterCredentials } from '../types/auth.types';
 
@@ -23,6 +24,7 @@ export class AuthService {
         email,
         password,
         options: {
+          emailRedirectTo: APP_CONFIG.getAuthCallbackUrl(),
           data: {
             username,
             full_name: full_name || username,
