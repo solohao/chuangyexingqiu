@@ -1,58 +1,38 @@
-name: Deploy to GitHub Pages
+name: Deploy to Server
 
 on:
   push:
     branches: [ main ]
 
-# 设置权限
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# 只允许一个并发部署
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Setup pnpm
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install pnpm
       uses: pnpm/action-setup@v2
       with:
         version: 8
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'pnpm'
-
+        
     - name: Install dependencies
-      run: pnpm install --no-frozen-lockfile
-
+      run: pnpm install
+      
     - name: Build
       run: pnpm run build
-      env:
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        VITE_AMAP_KEY: ${{ secrets.VITE_AMAP_KEY }}
-        VITE_APP_ENV: production
-
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
-
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
+      
+    - name: Deploy to server
+      uses: appleboy/scp-action@v0.1.4
       with:
-        path: './dist'
-
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        source: "dist/*"
+        target: "/www/wwwroot/chuangyexingqiu.guangliangzhisuan.com/"
+        strip_components: 1

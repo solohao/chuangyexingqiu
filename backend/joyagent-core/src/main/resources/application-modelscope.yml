@@ -1,0 +1,85 @@
+# 魔搭ModelScope API-Inference配置文件
+# API Token: ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229
+# 使用方式: java -jar app.jar --spring.profiles.active=modelscope
+
+spring:
+  profiles:
+    active: modelscope
+
+llm:
+  default:
+    base_url: 'https://api-inference.modelscope.cn/v1'
+    apikey: '${MODELSCOPE_ACCESS_TOKEN:ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229}'
+    interface_url: '/chat/completions'
+    model: 'Qwen/Qwen2.5-7B-Instruct'
+    stream: true  # 启用流式输出
+  settings: '{
+    "Qwen/Qwen2.5-7B-Instruct": {
+        "model": "Qwen/Qwen2.5-7B-Instruct",
+        "max_tokens": 2000,
+        "temperature": 0.7,
+        "base_url": "https://api-inference.modelscope.cn/v1",
+        "apikey": "${MODELSCOPE_ACCESS_TOKEN:ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229}",
+        "interface_url": "/chat/completions",
+        "max_input_tokens": 8000,
+        "stream": true
+    },
+    "Qwen/Qwen2.5-14B-Instruct": {
+        "model": "Qwen/Qwen2.5-14B-Instruct", 
+        "max_tokens": 2000,
+        "temperature": 0.7,
+        "base_url": "https://api-inference.modelscope.cn/v1",
+        "apikey": "${MODELSCOPE_ACCESS_TOKEN:ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229}",
+        "interface_url": "/chat/completions",
+        "max_input_tokens": 32000,
+        "stream": true
+    },
+    "Qwen/Qwen2.5-Coder-32B-Instruct": {
+        "model": "Qwen/Qwen2.5-Coder-32B-Instruct",
+        "max_tokens": 2000, 
+        "temperature": 0.3,
+        "base_url": "https://api-inference.modelscope.cn/v1",
+        "apikey": "${MODELSCOPE_ACCESS_TOKEN:ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229}",
+        "interface_url": "/chat/completions",
+        "max_input_tokens": 32000,
+        "stream": true
+    },
+    "deepseek-ai/DeepSeek-V3": {
+        "model": "deepseek-ai/DeepSeek-V3",
+        "max_tokens": 2000,
+        "temperature": 0.7,
+        "base_url": "https://api-inference.modelscope.cn/v1",
+        "apikey": "${MODELSCOPE_ACCESS_TOKEN:ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229}",
+        "interface_url": "/chat/completions",
+        "max_input_tokens": 64000,
+        "stream": true
+    }
+  }'
+
+# 智能体配置 - 针对魔搭API优化
+autobots:
+  autoagent:
+    planner:
+      model_name: 'Qwen/Qwen2.5-7B-Instruct'  # 规划任务使用7B模型
+      max_steps: 40
+    executor:
+      model_name: 'Qwen/Qwen2.5-14B-Instruct'   # 执行任务使用14B模型
+      max_steps: 40
+    react:
+      model_name: 'Qwen/Qwen2.5-7B-Instruct'  # 反应式对话使用7B模型
+      max_steps: 40
+    tool:
+      code_agent:
+        model_name: 'Qwen/Qwen2.5-Coder-32B-Instruct'  # 代码任务使用专用代码模型
+
+# SSE配置优化
+server:
+  tomcat:
+    connection-timeout: 60000  # 60秒连接超时
+    keep-alive-timeout: 30000  # 30秒保活超时
+  
+# 日志配置
+logging:
+  level:
+    com.jd.genie.util.SseUtil: DEBUG
+    com.jd.genie.agent.printer.SSEPrinter: DEBUG
