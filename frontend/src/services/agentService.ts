@@ -2,7 +2,8 @@
 
 import '../types/message';
 import { agentRegistry } from './agentRegistry.service';
-import type { AgentInfo, AgentCategory } from '../types/agents';
+import { backendApiService } from './backendApi.service';
+import type { AgentInfo, AgentCategory, AgentType } from '../types/agents';
 import type { ProjectContext } from '../../../shared/types/agent.types';
 
 /**
@@ -108,85 +109,68 @@ export class AgentService {
     recommendedAgents: AgentInfo[];
     reasoning: string;
   } {
-    const queryLower = query.toLowerCase();
+    // 使用后端API进行意图分析
+    const analysis = backendApiService.analyzeIntentAndRecommendAgents(query, context);
     
-    // 商业模式相关
-    if (queryLower.includes('商业模式') || queryLower.includes('画布') || queryLower.includes('盈利模式')) {
-      return {
-        intent: 'business_model_analysis',
-        confidence: 0.9,
-        recommendedAgents: [this.getAgentById('business_canvas_agent')!].filter(Boolean),
-        reasoning: '检测到商业模式相关关键词，推荐使用商业模式画布智能体'
-      };
-    }
-    
-    // SWOT分析相关
-    if (queryLower.includes('swot') || queryLower.includes('优势') || queryLower.includes('劣势') || queryLower.includes('威胁') || queryLower.includes('机会')) {
-      return {
-        intent: 'swot_analysis',
-        confidence: 0.85,
-        recommendedAgents: [this.getAgentById('swot_analysis_agent')!].filter(Boolean),
-        reasoning: '检测到SWOT分析相关关键词，推荐使用SWOT分析智能体'
-      };
-    }
-    
-    // 市场分析相关
-    if (queryLower.includes('市场') || queryLower.includes('竞争') || queryLower.includes('调研') || queryLower.includes('用户研究')) {
-      return {
-        intent: 'market_research',
-        confidence: 0.8,
-        recommendedAgents: [this.getAgentById('market_research_agent')!].filter(Boolean),
-        reasoning: '检测到市场研究相关关键词，推荐使用市场研究智能体'
-      };
-    }
-    
-    // 技术相关
-    if (queryLower.includes('技术') || queryLower.includes('架构') || queryLower.includes('开发') || queryLower.includes('技术栈')) {
-      return {
-        intent: 'tech_development',
-        confidence: 0.85,
-        recommendedAgents: [this.getAgentById('tech_stack_agent')!].filter(Boolean),
-        reasoning: '检测到技术开发相关关键词，推荐使用技术栈推荐智能体'
-      };
-    }
-    
-    // 财务相关
-    if (queryLower.includes('财务') || queryLower.includes('融资') || queryLower.includes('投资') || queryLower.includes('成本')) {
-      return {
-        intent: 'financial_analysis',
-        confidence: 0.8,
-        recommendedAgents: [this.getAgentById('financial_model_agent')!].filter(Boolean),
-        reasoning: '检测到财务分析相关关键词，推荐使用财务建模智能体'
-      };
-    }
-    
-    // 政策相关
-    if (queryLower.includes('政策') || queryLower.includes('补贴') || queryLower.includes('扶持') || queryLower.includes('合规')) {
-      return {
-        intent: 'policy_matching',
-        confidence: 0.8,
-        recommendedAgents: [this.getAgentById('policy_matching_agent')!].filter(Boolean),
-        reasoning: '检测到政策相关关键词，推荐使用政策匹配智能体'
-      };
-    }
-    
-    // 孵化器相关
-    if (queryLower.includes('孵化器') || queryLower.includes('加速器') || queryLower.includes('孵化')) {
-      return {
-        intent: 'incubator_recommendation',
-        confidence: 0.8,
-        recommendedAgents: [this.getAgentById('incubator_agent')!].filter(Boolean),
-        reasoning: '检测到孵化器相关关键词，推荐使用孵化器推荐智能体'
-      };
-    }
-    
-    // 默认推荐基于上下文的智能体
+    // 将AgentType转换为AgentInfo
+    const recommendedAgents = analysis.recommendedAgents
+      .map(agentType => this.getAgentById(agentType))
+      .filter((agent): agent is AgentInfo => agent !== undefined);
+
     return {
-      intent: 'general_startup_consultation',
-      confidence: 0.6,
-      recommendedAgents: this.getRecommendedAgents(context),
-      reasoning: '未检测到特定意图，基于项目上下文推荐相关智能体'
+      intent: analysis.intent,
+      confidence: analysis.confidence,
+      recommendedAgents,
+      reasoning: analysis.reasoning
     };
+  }
+
+  /**
+   * 执行多智能体工作流
+   */
+  async executeWorkflow(
+    task: string,
+    agentTypes: string[],
+    context?: ProjectContext
+  ) {
+    const requestId = this.generateRequestId();
+    
+    return await backendApiService.executeWorkflow({
+      task,
+      agentTypes: agentTypes as any[],
+      projectContext: context,
+      requestId,
+      stream: false
+    });
+  }
+
+  /**
+   * 调用单个智能体
+   */
+  async callAgent(
+    agentId: string,
+    task: string,
+    context?: ProjectContext
+  ) {
+    const requestId = this.generateRequestId();
+    const analysisRequest = {
+      task,
+      projectContext: context,
+      requestId
+    };
+
+    switch (agentId) {
+      case 'business_canvas_agent':
+        return await backendApiService.analyzeBusinessCanvas(analysisRequest);
+      case 'swot_analysis_agent':
+        return await backendApiService.performSWOTAnalysis(analysisRequest);
+      case 'policy_matching_agent':
+        return await backendApiService.matchPolicies(analysisRequest);
+      case 'incubator_agent':
+        return await backendApiService.recommendIncubators(analysisRequest);
+      default:
+        throw new Error(`不支持的智能体: ${agentId}`);
+    }
   }
 
   /**

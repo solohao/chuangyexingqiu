@@ -9,7 +9,7 @@ import time
 from openai import OpenAI
 
 # 配置信息
-API_KEY = "ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229"
+API_KEY = 
 BASE_URL = "https://api-inference.modelscope.cn/v1"
 
 # 测试模型列表

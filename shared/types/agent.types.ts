@@ -19,14 +19,17 @@ export interface AgentResponse {
 // 智能体状态枚举
 export type AgentStatus = 'available' | 'busy' | 'offline' | 'error';
 
-// 智能体类型枚举
+// 智能体类型枚举 - 基于后端实际智能体
 export type AgentType = 
-  | 'market-analysis'
-  | 'tech-development' 
-  | 'business-strategy'
-  | 'finance-analysis'
-  | 'legal-consulting'
-  | 'orchestrator';
+  | 'business_canvas_agent'
+  | 'swot_analysis_agent'
+  | 'policy_matching_agent'
+  | 'incubator_agent'
+  | 'market_research_agent'
+  | 'tech_stack_agent'
+  | 'financial_model_agent'
+  | 'react'
+  | 'plan_executor';
 
 // 智能体分类
 export interface AgentCategory {

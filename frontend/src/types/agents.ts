@@ -3,7 +3,7 @@
 import type { 
   AgentInfo as SharedAgentInfo, 
   AgentCategory as SharedAgentCategory,
-  AgentStatus as SharedAgentStatus,
+  AgentStatus,
   AgentType,
   AgentConfig,
   AgentMetrics,
@@ -20,6 +20,9 @@ export interface AgentInfo extends Omit<SharedAgentInfo, 'type'> {
 }
 
 export interface AgentCategory extends SharedAgentCategory {}
+
+// 重新导出共享类型
+export type { AgentType, AgentStatus, AgentConfig, AgentMetrics, ProjectContext, UserPreferences };
 
 // 导入MESSAGE类型定义
 import './message';
@@ -93,7 +96,7 @@ export const AVAILABLE_AGENTS: AgentInfo[] = [
         id: 'business_canvas_agent',
         name: '商业模式画布',
         description: '引导完成九大要素分析：客户细分、价值主张、渠道通路等',
-        type: 'business-strategy',
+        type: 'business_canvas_agent',
         category: AGENT_CATEGORIES.find(c => c.id === 'business-strategy')!,
         capabilities: ['商业模式设计', '价值主张分析', '客户细分', '收入模式'],
         status: 'available',
@@ -114,7 +117,7 @@ export const AVAILABLE_AGENTS: AgentInfo[] = [
         id: 'swot_analysis_agent',
         name: 'SWOT分析',
         description: '全面分析项目的优势、劣势、机会和威胁',
-        type: 'market-analysis',
+        type: 'swot_analysis_agent',
         category: AGENT_CATEGORIES.find(c => c.id === 'market-analysis')!,
         capabilities: ['优势分析', '劣势识别', '机会发现', '威胁评估'],
         status: 'available',
@@ -135,7 +138,7 @@ export const AVAILABLE_AGENTS: AgentInfo[] = [
         id: 'policy_matching_agent',
         name: '政策匹配',
         description: '智能匹配适合的政策支持和补贴机会',
-        type: 'legal-consulting',
+        type: 'policy_matching_agent',
         category: AGENT_CATEGORIES.find(c => c.id === 'resources')!,
         capabilities: ['政策解读', '补贴申请', '合规检查', '资质评估'],
         status: 'available',
@@ -156,7 +159,7 @@ export const AVAILABLE_AGENTS: AgentInfo[] = [
         id: 'incubator_agent',
         name: '孵化器推荐',
         description: '根据项目特点智能推荐合适的孵化器',
-        type: 'business-strategy',
+        type: 'incubator_agent',
         category: AGENT_CATEGORIES.find(c => c.id === 'resources')!,
         capabilities: ['孵化器匹配', '申请指导', '资源对接', '发展建议'],
         status: 'available',
@@ -178,7 +181,7 @@ export const AVAILABLE_AGENTS: AgentInfo[] = [
         id: 'market_research_agent',
         name: '市场研究',
         description: '深度市场调研、行业分析、竞争对手研究',
-        type: 'market-analysis',
+        type: 'market_research_agent',
         category: AGENT_CATEGORIES.find(c => c.id === 'market-analysis')!,
         capabilities: ['市场规模分析', '竞争对手研究', '行业趋势', '用户调研'],
         status: 'available',
@@ -198,7 +201,7 @@ export const AVAILABLE_AGENTS: AgentInfo[] = [
         id: 'tech_stack_agent',
         name: '技术栈推荐',
         description: '根据项目需求推荐最适合的技术栈和架构',
-        type: 'tech-development',
+        type: 'tech_stack_agent',
         category: AGENT_CATEGORIES.find(c => c.id === 'tech-development')!,
         capabilities: ['技术选型', '架构设计', '性能优化', '技术风险评估'],
         status: 'available',
@@ -218,7 +221,7 @@ export const AVAILABLE_AGENTS: AgentInfo[] = [
         id: 'financial_model_agent',
         name: '财务建模',
         description: '创建财务模型、投资回报分析、融资规划',
-        type: 'finance-analysis',
+        type: 'financial_model_agent',
         category: AGENT_CATEGORIES.find(c => c.id === 'finance-analysis')!,
         capabilities: ['财务预测', '投资分析', '成本核算', '融资策略'],
         status: 'available',
@@ -239,8 +242,7 @@ export const AVAILABLE_AGENTS: AgentInfo[] = [
 // 智能体交互模式
 export type AgentMode = 'orchestrated' | 'direct';
 
-// 智能体状态
-export type AgentStatus = 'available' | 'busy' | 'offline';
+// 移除重复的AgentStatus定义，使用共享类型
 
 export interface AgentInteractionState {
     mode: AgentMode;

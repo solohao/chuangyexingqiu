@@ -1,5 +1,5 @@
 # 魔搭ModelScope API-Inference配置文件
-# API Token: ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229
+# API Token: 从环境变量 MODELSCOPE_ACCESS_TOKEN 读取
 # 使用方式: java -jar app.jar --spring.profiles.active=modelscope
 
 spring:
@@ -9,7 +9,7 @@ spring:
 llm:
   default:
     base_url: 'https://api-inference.modelscope.cn/v1'
-    apikey: '${MODELSCOPE_ACCESS_TOKEN:ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229}'
+    apikey: '${MODELSCOPE_ACCESS_TOKEN:your_modelscope_api_key_here}'
     interface_url: '/chat/completions'
     model: 'Qwen/Qwen2.5-7B-Instruct'
     stream: true  # 启用流式输出
@@ -19,7 +19,7 @@ llm:
         "max_tokens": 2000,
         "temperature": 0.7,
         "base_url": "https://api-inference.modelscope.cn/v1",
-        "apikey": "${MODELSCOPE_ACCESS_TOKEN:ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229}",
+        "apikey": "${MODELSCOPE_ACCESS_TOKEN:your_modelscope_api_key_here}",
         "interface_url": "/chat/completions",
         "max_input_tokens": 8000,
         "stream": true
@@ -29,7 +29,7 @@ llm:
         "max_tokens": 2000,
         "temperature": 0.7,
         "base_url": "https://api-inference.modelscope.cn/v1",
-        "apikey": "${MODELSCOPE_ACCESS_TOKEN:ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229}",
+        "apikey": "${MODELSCOPE_ACCESS_TOKEN:your_modelscope_api_key_here}",
         "interface_url": "/chat/completions",
         "max_input_tokens": 32000,
         "stream": true
@@ -39,7 +39,7 @@ llm:
         "max_tokens": 2000, 
         "temperature": 0.3,
         "base_url": "https://api-inference.modelscope.cn/v1",
-        "apikey": "${MODELSCOPE_ACCESS_TOKEN:ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229}",
+        "apikey": "${MODELSCOPE_ACCESS_TOKEN:your_modelscope_api_key_here}",
         "interface_url": "/chat/completions",
         "max_input_tokens": 32000,
         "stream": true
@@ -49,7 +49,7 @@ llm:
         "max_tokens": 2000,
         "temperature": 0.7,
         "base_url": "https://api-inference.modelscope.cn/v1",
-        "apikey": "${MODELSCOPE_ACCESS_TOKEN:ms-13ddfa1d-dbf8-405f-b8da-85b23bbc7229}",
+        "apikey": "${MODELSCOPE_ACCESS_TOKEN:your_modelscope_api_key_here}",
         "interface_url": "/chat/completions",
         "max_input_tokens": 64000,
         "stream": true

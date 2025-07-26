@@ -12,9 +12,13 @@ import {
     X
 } from 'lucide-react';
 import { AgentCatalog } from '../../../components/specialized/AgentCatalog';
-import { WorkflowVisualizationCard, type WorkflowVisualization } from '../../../components/specialized/WorkflowVisualization';
+import { WorkflowVisualizationCard, type WorkflowVisualization, convertWorkflowResult } from '../../../components/specialized/WorkflowVisualization';
+import { RequirementAnalysis } from '../../../components/specialized/RequirementAnalysis';
+import { backendApiService } from '../../../services/backendApi.service';
 import type { AgentInfo } from '../../../types/agents';
 import type { ProjectContext } from '../../../../../shared/types/agent.types';
+import { agentService } from '../../../services/agentService';
+import { useRequirementAnalysis } from '../../../hooks/useRequirementAnalysis';
 
 interface Message {
     id: string;
@@ -48,6 +52,22 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
     const [inputMessage, setInputMessage] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [currentWorkflow, setCurrentWorkflow] = useState<WorkflowVisualization | null>(null);
+
+    // 需求分析状态
+    const [showRequirementAnalysis, setShowRequirementAnalysis] = useState(false);
+    const [currentQuery, setCurrentQuery] = useState('');
+    const [clarificationQuestions, setClarificationQuestions] = useState<any[]>([]);
+
+    // 使用需求分析Hook
+    const {
+        analysis,
+        loading: analysisLoading,
+        error: analysisError,
+        analyzeRequirement,
+        checkNeedsClarification,
+        recommendAgents,
+        reset: resetAnalysis
+    } = useRequirementAnalysis();
 
     // 项目上下文
     const [projectContext, setProjectContext] = useState<ProjectContext | undefined>();
@@ -85,7 +105,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
     // 快捷建议 - 根据模式显示不同的建议
     const suggestions = mode === 'orchestrated' ? [
         '分析竞争对手',
-        '制定融资计划', 
+        '制定融资计划',
         'SWOT分析',
         '商业模式画布',
         '政策匹配'
@@ -114,7 +134,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
         setMode(newMode);
         setSelectedAgentId(undefined);
         setCurrentWorkflow(null);
-        
+
         // 添加模式切换消息
         const switchMessage: Message = {
             id: Date.now().toString(),
@@ -148,6 +168,35 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
         }
     };
 
+    // 处理需求分析完成
+    const handleAnalysisComplete = (result: any) => {
+        console.log('需求分析完成:', result);
+        // 可以在这里处理分析结果，比如自动推荐智能体等
+    };
+
+    // 处理澄清需求
+    const handleClarificationNeeded = (questions: any[]) => {
+        setClarificationQuestions(questions);
+        console.log('需要澄清的问题:', questions);
+    };
+
+    // 处理澄清回答
+    const handleClarificationAnswer = async (answer: string) => {
+        // 添加用户回答到消息中
+        const answerMessage: Message = {
+            id: Date.now().toString(),
+            type: 'user',
+            content: answer,
+            timestamp: new Date()
+        };
+        setMessages(prev => [...prev, answerMessage]);
+
+        // 基于回答重新分析需求
+        const updatedQuery = `${currentQuery}\n\n补充信息：${answer}`;
+        setCurrentQuery(updatedQuery);
+        await analyzeRequirement(updatedQuery, 'full');
+    };
+
     // 处理直接对话
     const handleDirectChat = (agent: AgentInfo) => {
         setMode('direct');
@@ -173,39 +222,154 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
         };
 
         setMessages(prev => [...prev, userMessage]);
+        const currentInput = inputMessage;
         setInputMessage('');
         setIsTyping(true);
 
-        // 模拟响应
-        setTimeout(() => {
+        try {
             if (mode === 'orchestrated') {
-                handleOrchestratedResponse(inputMessage);
+                await handleOrchestratedResponse(currentInput);
             } else {
-                handleDirectResponse(inputMessage);
+                await handleDirectResponse(currentInput);
             }
+        } catch (error) {
+            console.error('处理消息失败:', error);
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
     // 处理编排模式响应
-    const handleOrchestratedResponse = (userInput: string) => {
-        // 创建工作流可视化
+    const handleOrchestratedResponse = async (userInput: string) => {
+        try {
+            // 设置当前查询并显示需求分析
+            setCurrentQuery(userInput);
+            setShowRequirementAnalysis(true);
+
+            // 显示分析开始消息
+            const analysisStartMessage: Message = {
+                id: Date.now().toString(),
+                type: 'ai',
+                content: '正在分析您的需求，请稍候...',
+                timestamp: new Date()
+            };
+            setMessages(prev => [...prev, analysisStartMessage]);
+
+            // 执行需求分析
+            await analyzeRequirement(userInput, 'full');
+
+            // 检查是否需要澄清
+            const needsClarification = await checkNeedsClarification(userInput);
+
+            if (needsClarification) {
+                const clarificationMessage: Message = {
+                    id: (Date.now() + 1).toString(),
+                    type: 'ai',
+                    content: '我需要了解更多信息来更好地帮助您。请查看下方的需求分析结果，并回答相关问题。',
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, clarificationMessage]);
+                return;
+            }
+
+            // 获取推荐的智能体
+            const recommendedAgentIds = await recommendAgents(userInput);
+
+            // 显示意图分析结果
+            const analysisMessage: Message = {
+                id: (Date.now() + 2).toString(),
+                type: 'ai',
+                content: `需求分析完成！正在启动多智能体工作流，预计调用 ${recommendedAgentIds.length} 个智能体...`,
+                timestamp: new Date()
+            };
+            setMessages(prev => [...prev, analysisMessage]);
+
+            // 执行工作流
+            const agentTypes = recommendedAgentIds; // 直接使用推荐的智能体ID数组
+            const workflowResult = await agentService.executeWorkflow(
+                userInput,
+                agentTypes,
+                projectContext
+            );
+
+            // 转换并显示工作流可视化
+            const workflowViz = convertWorkflowResult(workflowResult);
+            setCurrentWorkflow(workflowViz);
+
+            // 显示工作流结果消息
+            const resultMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                type: 'ai',
+                content: workflowResult.status === 'completed'
+                    ? `工作流执行完成！已成功调用 ${Object.keys(workflowResult.results).length} 个智能体，为您提供了全面的分析结果。`
+                    : `工作流执行${workflowResult.status === 'failed' ? '失败' : '异常'}：${workflowResult.error || '未知错误'}`,
+                timestamp: new Date()
+            };
+            setMessages(prev => [...prev, resultMessage]);
+
+        } catch (error) {
+            console.error('编排模式响应失败:', error);
+            const errorMessage: Message = {
+                id: Date.now().toString(),
+                type: 'ai',
+                content: `抱歉，处理您的请求时出现了错误：${error instanceof Error ? error.message : '未知错误'}`,
+                timestamp: new Date()
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        }
+    };
+
+    // 处理直接模式响应  
+    const handleDirectResponse = async (userInput: string) => {
+        try {
+            if (selectedAgentId) {
+                const result = await agentService.callAgent(selectedAgentId, userInput, projectContext);
+
+                const aiResponse: Message = {
+                    id: Date.now().toString(),
+                    type: 'ai',
+                    content: result.data ?
+                        `${agentService.getAgentById(selectedAgentId)?.name}的分析结果：\n\n${JSON.stringify(result.data, null, 2)}` :
+                        `${agentService.getAgentById(selectedAgentId)?.name}执行完成`,
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, aiResponse]);
+            } else {
+                const aiResponse: Message = {
+                    id: Date.now().toString(),
+                    type: 'ai',
+                    content: '请先选择一个智能体进行对话',
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, aiResponse]);
+            }
+        } catch (error) {
+            console.error('直接模式响应失败:', error);
+            const errorMessage: Message = {
+                id: Date.now().toString(),
+                type: 'ai',
+                content: `抱歉，调用智能体时出现了错误：${error instanceof Error ? error.message : '未知错误'}`,
+                timestamp: new Date()
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        }
+    };
+
+    // 创建模拟工作流（保留作为备用）
+    const createMockWorkflow = () => {
         const workflow: WorkflowVisualization = {
             id: Date.now().toString(),
-            name: '商业模式分析',
+            title: '商业模式分析',
             progress: 0,
             status: 'running',
-            isExpanded: false,
-            totalDuration: 18,
-            agentCount: 1,
-            apiCallCount: 3,
             estimatedRemaining: 42,
+            startTime: new Date(),
             steps: [
-                { id: '1', name: '意图分析', status: 'completed', duration: 2, description: '商业模式分析', details: '已识别用户意图' },
-                { id: '2', name: '智能体选择', status: 'in-progress', description: '商业模式画布智能体', details: '正在调用智能体' },
-                { id: '3', name: '数据收集', status: 'waiting', description: '收集项目相关数据' },
-                { id: '4', name: '智能体处理', status: 'waiting', description: '智能体分析处理' },
-                { id: '5', name: '结果合成', status: 'waiting', description: '整合分析结果' }
+                { id: '1', name: '意图分析', status: 'completed', duration: 2, description: '商业模式分析', details: '已识别用户意图', agentId: 'requirement_analysis_agent', agentName: '需求分析智能体' },
+                { id: '2', name: '智能体选择', status: 'in-progress', description: '商业模式画布智能体', details: '正在调用智能体', agentId: 'business_canvas_agent', agentName: '商业模式画布智能体' },
+                { id: '3', name: '数据收集', status: 'waiting', description: '收集项目相关数据', agentId: 'business_canvas_agent', agentName: '商业模式画布智能体' },
+                { id: '4', name: '智能体处理', status: 'waiting', description: '智能体分析处理', agentId: 'business_canvas_agent', agentName: '商业模式画布智能体' },
+                { id: '5', name: '结果合成', status: 'waiting', description: '整合分析结果', agentId: 'orchestrator', agentName: '编排智能体' }
             ]
         };
 
@@ -237,35 +401,18 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
             setCurrentWorkflow(prev => prev ? {
                 ...prev,
                 progress: 40,
-                steps: prev.steps.map(step => 
+                steps: prev.steps.map(step =>
                     step.id === '2' ? { ...step, status: 'completed' as const, duration: 1 } :
-                    step.id === '3' ? { ...step, status: 'in-progress' as const } :
-                    step
+                        step.id === '3' ? { ...step, status: 'in-progress' as const } :
+                            step
                 )
             } : null);
         }, 2000);
     };
 
-    // 处理直接模式响应
-    const handleDirectResponse = (userInput: string) => {
-        const agentName = selectedAgentId === 'business_canvas_agent' ? '商业模式画布智能体' : 
-                         selectedAgentId === 'swot_analysis_agent' ? 'SWOT分析智能体' : 'AI助手';
 
-        const agentResponse: Message = {
-            id: (Date.now() + 1).toString(),
-            type: 'agent',
-            content: `针对您的问题"${userInput}"，我来为您提供专业的分析和建议...`,
-            timestamp: new Date(),
-            agentId: selectedAgentId,
-            agentName
-        };
-        setMessages(prev => [...prev, agentResponse]);
-    };
 
     // 工作流控制函数
-    const handleToggleWorkflowExpanded = () => {
-        setCurrentWorkflow(prev => prev ? { ...prev, isExpanded: !prev.isExpanded } : null);
-    };
 
     const handlePauseWorkflow = () => {
         setCurrentWorkflow(prev => prev ? { ...prev, status: 'paused' } : null);
@@ -286,22 +433,20 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => handleModeSwitch('orchestrated')}
-                        className={`px-3 py-1 text-xs rounded-md transition-all duration-200 flex items-center gap-1 ${
-                            mode === 'orchestrated' 
-                                ? 'bg-blue-500 text-white font-medium shadow-sm' 
+                        className={`px-3 py-1 text-xs rounded-md transition-all duration-200 flex items-center gap-1 ${mode === 'orchestrated'
+                                ? 'bg-blue-500 text-white font-medium shadow-sm'
                                 : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
-                        }`}
+                            }`}
                     >
                         <span className={`w-2 h-2 rounded-full ${mode === 'orchestrated' ? 'bg-white' : 'bg-blue-500'}`} />
                         🎯 编排模式
                     </button>
                     <button
                         onClick={() => handleModeSwitch('direct')}
-                        className={`px-3 py-1 text-xs rounded-md transition-all duration-200 flex items-center gap-1 ${
-                            mode === 'direct' 
-                                ? 'bg-green-500 text-white font-medium shadow-sm' 
+                        className={`px-3 py-1 text-xs rounded-md transition-all duration-200 flex items-center gap-1 ${mode === 'direct'
+                                ? 'bg-green-500 text-white font-medium shadow-sm'
                                 : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
-                        }`}
+                            }`}
                     >
                         <span className={`w-2 h-2 rounded-full ${mode === 'direct' ? 'bg-white' : 'bg-green-500'}`} />
                         💬 直接模式
@@ -340,14 +485,14 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                             <span className="text-sm font-medium text-blue-900">
                                 正在与 🎯 {selectedAgentId === 'business_canvas_agent' ? '商业模式画布智能体' : 'AI智能体'} 对话
                             </span>
-                            <button 
+                            <button
                                 onClick={() => handleModeSwitch('orchestrated')}
                                 className="text-xs text-blue-600 hover:text-blue-700"
                             >
                                 [切换模式]
                             </button>
                         </div>
-                </div>
+                    </div>
                 )}
 
                 {/* 消息列表 */}
@@ -361,9 +506,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                                     {mode === 'orchestrated' ? '🎯 多智能体编排模式' : '💬 直接对话模式'}
                                 </h3>
                                 <p className="text-sm text-gray-500 mb-4">
-                                    {mode === 'orchestrated' 
-                                        ? '我可以协调多个专业智能体为您服务，自动创建工作流完成复杂任务' 
-                                        : selectedAgentId 
+                                    {mode === 'orchestrated'
+                                        ? '我可以协调多个专业智能体为您服务，自动创建工作流完成复杂任务'
+                                        : selectedAgentId
                                             ? `正在与 ${selectedAgentId === 'business_canvas_agent' ? '商业模式画布智能体' : 'AI智能体'} 进行一对一专业对话`
                                             : '请从上方智能体目录中选择一个专业智能体开始深度对话'
                                     }
@@ -396,7 +541,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                                             🤖 {selectedAgentId === 'business_canvas_agent' ? '商业模式画布智能体' : 'AI智能体'}
                                         </h4>
                                         <p className="text-xs text-green-700">
-                                            {selectedAgentId === 'business_canvas_agent' 
+                                            {selectedAgentId === 'business_canvas_agent'
                                                 ? '专业的商业模式分析专家，精通商业模式画布九大要素分析'
                                                 : '专业AI助手，为您提供深度分析和建议'
                                             }
@@ -410,15 +555,14 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                         {messages.map(message => (
                             <div key={message.id}>
                                 <div className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[85%] p-3 rounded-lg text-sm ${
-                                        message.type === 'user'
+                                    <div className={`max-w-[85%] p-3 rounded-lg text-sm ${message.type === 'user'
                                             ? 'bg-blue-600 text-white'
                                             : message.type === 'system'
-                                            ? 'bg-gray-100 text-gray-700'
-                                            : message.type === 'agent'
-                                            ? 'bg-green-50 border border-green-200 text-gray-800'
-                                            : 'bg-white border border-gray-200 text-gray-800'
-                                    }`}>
+                                                ? 'bg-gray-100 text-gray-700'
+                                                : message.type === 'agent'
+                                                    ? 'bg-green-50 border border-green-200 text-gray-800'
+                                                    : 'bg-white border border-gray-200 text-gray-800'
+                                        }`}>
                                         {(message.type === 'agent' && message.agentName) && (
                                             <div className="flex items-center mb-2">
                                                 <Bot className="w-4 h-4 mr-2" />
@@ -426,42 +570,38 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                                             </div>
                                         )}
                                         <p className="text-sm leading-relaxed">{message.content}</p>
-                                        <p className={`text-xs mt-2 ${
-                                            message.type === 'user' ? 'text-blue-200' : 'text-gray-400'
-                                    }`}>
-                                    {message.timestamp.toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
-                                </p>
-                            </div>
+                                        <p className={`text-xs mt-2 ${message.type === 'user' ? 'text-blue-200' : 'text-gray-400'
+                                            }`}>
+                                            {message.timestamp.toLocaleTimeString([], {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </p>
+                                    </div>
                                 </div>
 
                                 {/* 工作流可视化 */}
                                 {message.workflowId && currentWorkflow && (
                                     <div className="mt-3 ml-8">
-                                        <WorkflowVisualizationCard 
+                                        <WorkflowVisualizationCard
                                             workflow={currentWorkflow}
-                                            onToggleExpanded={handleToggleWorkflowExpanded}
                                             onPause={handlePauseWorkflow}
                                             onStop={handleStopWorkflow}
-                                            onRestart={handleRestartWorkflow}
-                                            onShowLogs={() => console.log('显示日志')}
-                                            onShowAnalytics={() => console.log('显示分析')}
+                                            onResume={handleRestartWorkflow}
                                         />
                                     </div>
                                 )}
-                        </div>
-                    ))}
+                            </div>
+                        ))}
 
                         {/* 正在输入指示器 */}
-                    {isTyping && (
-                        <div className="flex justify-start">
+                        {isTyping && (
+                            <div className="flex justify-start">
                                 <div className="bg-white border border-gray-200 p-3 rounded-lg shadow-sm">
                                     <div className="flex items-center space-x-2">
                                         <Bot className="w-4 h-4 text-gray-400" />
                                         <span className="text-sm text-gray-500">正在处理中</span>
-                                    <div className="flex space-x-1">
+                                        <div className="flex space-x-1">
                                             <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
                                             <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
                                             <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
@@ -470,9 +610,50 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                                 </div>
                             </div>
                         )}
-                        </div>
+
+                        {/* 需求分析组件 */}
+                        {showRequirementAnalysis && currentQuery && (
+                            <div className="mt-4">
+                                <RequirementAnalysis
+                                    query={currentQuery}
+                                    onAnalysisComplete={handleAnalysisComplete}
+                                    onClarificationNeeded={handleClarificationNeeded}
+                                />
+                            </div>
+                        )}
+
+                        {/* 澄清问题 */}
+                        {clarificationQuestions.length > 0 && (
+                            <div className="mt-4 space-y-2">
+                                <h4 className="text-sm font-medium text-gray-900">请回答以下问题以获得更好的帮助：</h4>
+                                {clarificationQuestions.map((q, index) => (
+                                    <div key={index} className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                        <p className="text-sm font-medium text-yellow-900">{q.question}</p>
+                                        <p className="text-xs text-yellow-700 mt-1">{q.purpose}</p>
+                                        <div className="mt-2">
+                                            <input
+                                                type="text"
+                                                placeholder="请输入您的回答..."
+                                                className="w-full px-3 py-2 text-sm border border-yellow-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                                onKeyPress={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        const target = e.target as HTMLInputElement;
+                                                        if (target.value.trim()) {
+                                                            handleClarificationAnswer(target.value);
+                                                            target.value = '';
+                                                            setClarificationQuestions([]);
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
-                </div>
+            </div>
 
             {/* 4. 输入区域 (固定80px) */}
             <div className="h-20 flex-shrink-0 border-t border-gray-200 bg-white">
@@ -485,27 +666,27 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                             onChange={(e) => setInputMessage(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                             placeholder={
-                                mode === 'orchestrated' 
-                                    ? "描述您的需求，我会协调多个智能体为您服务..." 
-                                    : selectedAgentId 
+                                mode === 'orchestrated'
+                                    ? "描述您的需求，我会协调多个智能体为您服务..."
+                                    : selectedAgentId
                                         ? `与${selectedAgentId === 'business_canvas_agent' ? '商业模式画布智能体' : 'AI智能体'}对话...`
                                         : "请先选择一个智能体开始专业对话..."
                             }
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
-                        <button 
+                        <button
                             className="p-2 text-gray-400 hover:text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
                             title="附件"
                         >
                             <Paperclip className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                             className="p-2 text-gray-400 hover:text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
                             title="语音"
                         >
                             <Mic className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                             className="p-2 text-gray-400 hover:text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
                             title="设置"
                         >
@@ -525,14 +706,14 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                     <div className="flex gap-1 overflow-x-auto scrollbar-hide">
                         <span className="text-xs text-gray-500 whitespace-nowrap mr-2 self-center">💡 建议:</span>
                         {suggestions.map(suggestion => (
-                                <button
+                            <button
                                 key={suggestion}
                                 onClick={() => setInputMessage(suggestion)}
                                 className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 whitespace-nowrap transition-colors"
-                                >
+                            >
                                 {suggestion}
-                                </button>
-                            ))}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>

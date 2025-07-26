@@ -17,7 +17,9 @@ from starlette.middleware.cors import CORSMiddleware
 
 from genie_tool.util.middleware_util import UnknownException, HTTPProcessTimeMiddleware
 
-load_dotenv()
+# 按优先级加载环境变量：.env.local > .env
+load_dotenv("../../.env")
+load_dotenv("../../.env.local")
 
 
 def print_logo():

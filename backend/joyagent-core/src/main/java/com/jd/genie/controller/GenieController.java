@@ -188,6 +188,32 @@ public class GenieController {
         fileTool.setAgentContext(agentContext);
         toolCollection.addTool(fileTool);
 
+        // startup agents
+        try {
+            // 需求分析智能体
+            com.startup.agents.RequirementAnalysisAgent requirementAnalysisAgent = new com.startup.agents.RequirementAnalysisAgent();
+            toolCollection.addTool(requirementAnalysisAgent);
+            
+            // 商业模式画布智能体
+            com.startup.agents.BusinessCanvasAgent businessCanvasAgent = new com.startup.agents.BusinessCanvasAgent();
+            toolCollection.addTool(businessCanvasAgent);
+            
+            // SWOT分析智能体
+            com.startup.agents.SWOTAnalysisAgent swotAnalysisAgent = new com.startup.agents.SWOTAnalysisAgent();
+            toolCollection.addTool(swotAnalysisAgent);
+            
+            // 政策匹配智能体
+            com.startup.agents.PolicyMatchingAgent policyMatchingAgent = new com.startup.agents.PolicyMatchingAgent();
+            toolCollection.addTool(policyMatchingAgent);
+            
+            // 孵化器推荐智能体
+            com.startup.agents.IncubatorAgent incubatorAgent = new com.startup.agents.IncubatorAgent();
+            toolCollection.addTool(incubatorAgent);
+            
+        } catch (Exception e) {
+            log.error("{} add startup agents failed", agentContext.getRequestId(), e);
+        }
+
         // default tool
         List<String> agentToolList = Arrays.asList(genieConfig.getMultiAgentToolListMap()
                 .getOrDefault("default", "search,code,report").split(","));
