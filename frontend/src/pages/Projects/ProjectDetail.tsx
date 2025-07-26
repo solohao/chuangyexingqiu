@@ -131,7 +131,7 @@ const ProjectDetail: React.FC = () => {
 
     if (parentId) {
       // 添加回复
-      setComments(prev => prev.map(comment => {
+      setComments((prev: any) => prev.map((comment: any) => {
         if (comment.id === parentId) {
           return {
             ...comment,
@@ -142,12 +142,12 @@ const ProjectDetail: React.FC = () => {
       }))
     } else {
       // 添加新评论
-      setComments(prev => [newComment, ...prev])
+      setComments((prev: any) => [newComment, ...prev])
     }
   }
 
   const handleLikeComment = (commentId: string) => {
-    setComments(prev => prev.map(comment => {
+    setComments((prev: any) => prev.map((comment: any) => {
       if (comment.id === commentId) {
         return {
           ...comment,
@@ -158,7 +158,7 @@ const ProjectDetail: React.FC = () => {
       // 处理回复的点赞
       return {
         ...comment,
-        replies: comment.replies.map(reply => {
+        replies: comment.replies.map((reply: any) => {
           if (reply.id === commentId) {
             return {
               ...reply,
@@ -173,7 +173,7 @@ const ProjectDetail: React.FC = () => {
   }
 
   const handleDeleteComment = (commentId: string) => {
-    setComments(prev => prev.filter(comment => comment.id !== commentId))
+    setComments((prev: any) => prev.filter((comment: any) => comment.id !== commentId))
   }
 
   if (loading) {

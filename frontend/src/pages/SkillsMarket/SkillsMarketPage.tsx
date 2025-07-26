@@ -50,7 +50,7 @@ const SkillsMarketPage: React.FC = () => {
               placeholder="搜索大师技能..."
               className="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
             />
           </div>
           <button className="ml-2 px-4 py-2 flex items-center text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg">

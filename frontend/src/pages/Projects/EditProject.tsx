@@ -228,7 +228,7 @@ const EditProject: React.FC = () => {
 
   // 处理表单字段变化
   const handleInputChange = (field: keyof EditProjectFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev: EditProjectFormData) => ({ ...prev, [field]: value }));
     
     // 实时验证协作偏好设置
     if (['collaboration_mode', 'location_type', 'meeting_preference', 'max_collaboration_distance'].includes(field)) {
@@ -434,7 +434,7 @@ const EditProject: React.FC = () => {
                 <input
                   type="text"
                   value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('title', e.target.value)}
                   className="input"
                   placeholder="项目名称"
                 />
@@ -446,7 +446,7 @@ const EditProject: React.FC = () => {
                 </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('description', e.target.value)}
                   className="input min-h-[120px]"
                   placeholder="项目描述"
                 />
@@ -469,7 +469,7 @@ const EditProject: React.FC = () => {
                 onLocationTypeChange={handleLocationTypeChange}
                 city={formData.city}
                 showCoworkingSpaces={true}
-                onLocationSelect={(location) => {
+                onLocationSelect={(location: any) => {
                   if (location.location) {
                     setSelectedLocation(location.location);
                     setLocationChanged(true);
@@ -489,7 +489,7 @@ const EditProject: React.FC = () => {
                     </label>
                     <select
                       value={formData.collaboration_mode}
-                      onChange={(e) => handleInputChange('collaboration_mode', e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('collaboration_mode', e.target.value)}
                       className="input"
                     >
                       <option value="local_only">仅限本地协作</option>
@@ -504,7 +504,7 @@ const EditProject: React.FC = () => {
                     </label>
                     <select
                       value={formData.meeting_preference}
-                      onChange={(e) => handleInputChange('meeting_preference', e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('meeting_preference', e.target.value)}
                       className="input"
                     >
                       <option value="both">线上线下都可以</option>
@@ -521,7 +521,7 @@ const EditProject: React.FC = () => {
                       <input
                         type="number"
                         value={formData.max_collaboration_distance}
-                        onChange={(e) => handleInputChange('max_collaboration_distance', parseInt(e.target.value))}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('max_collaboration_distance', parseInt(e.target.value))}
                         className="input"
                         min="1"
                         max="500"
@@ -534,7 +534,7 @@ const EditProject: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={formData.timezone_flexibility}
-                        onChange={(e) => handleInputChange('timezone_flexibility', e.target.checked)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('timezone_flexibility', e.target.checked)}
                         className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                       />
                       <span className="text-sm text-gray-700">接受跨时区协作</span>
@@ -554,11 +554,11 @@ const EditProject: React.FC = () => {
 
             <LocationVisibilitySettings
               visibility={formData.location_visibility}
-              onVisibilityChange={(visibility) => handleInputChange('location_visibility', visibility)}
+              onVisibilityChange={(visibility: any) => handleInputChange('location_visibility', visibility)}
               showExactAddress={formData.show_exact_address}
-              onShowExactAddressChange={(show) => handleInputChange('show_exact_address', show)}
+              onShowExactAddressChange={(show: boolean) => handleInputChange('show_exact_address', show)}
               allowContactForMeetup={formData.allow_contact_for_meetup}
-              onAllowContactForMeetupChange={(allow) => handleInputChange('allow_contact_for_meetup', allow)}
+              onAllowContactForMeetupChange={(allow: boolean) => handleInputChange('allow_contact_for_meetup', allow)}
               locationType={formData.location_type}
             />
           </div>
@@ -586,7 +586,7 @@ const EditProject: React.FC = () => {
             <div className="bg-red-50 border border-red-200 rounded-md p-4">
               <div className="text-sm font-medium text-red-800 mb-2">设置错误</div>
               <ul className="text-sm text-red-700 space-y-1">
-                {validationErrors.map((error, index) => (
+                {validationErrors.map((error: string, index: number) => (
                   <li key={index} className="flex items-start">
                     <span className="mr-1">•</span>
                     <span>{error}</span>
@@ -600,7 +600,7 @@ const EditProject: React.FC = () => {
             <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
               <div className="text-sm font-medium text-yellow-800 mb-2">设置建议</div>
               <ul className="text-sm text-yellow-700 space-y-1">
-                {validationWarnings.map((warning, index) => (
+                {validationWarnings.map((warning: string, index: number) => (
                   <li key={index} className="flex items-start">
                     <span className="mr-1">•</span>
                     <span>{warning}</span>

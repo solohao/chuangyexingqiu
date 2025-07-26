@@ -250,7 +250,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
     const handleDirectResponse = (userInput: string) => {
         const agentName = selectedAgentId === 'business_canvas_agent' ? '商业模式画布智能体' : 
                          selectedAgentId === 'swot_analysis_agent' ? 'SWOT分析智能体' : 'AI助手';
-        
+
         const agentResponse: Message = {
             id: (Date.now() + 1).toString(),
             type: 'agent',
@@ -347,7 +347,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                                 [切换模式]
                             </button>
                         </div>
-                    </div>
+                </div>
                 )}
 
                 {/* 消息列表 */}
@@ -428,13 +428,13 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                                         <p className="text-sm leading-relaxed">{message.content}</p>
                                         <p className={`text-xs mt-2 ${
                                             message.type === 'user' ? 'text-blue-200' : 'text-gray-400'
-                                        }`}>
-                                            {message.timestamp.toLocaleTimeString([], {
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </p>
-                                    </div>
+                                    }`}>
+                                    {message.timestamp.toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
+                                </p>
+                            </div>
                                 </div>
 
                                 {/* 工作流可视化 */}
@@ -451,17 +451,17 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                                         />
                                     </div>
                                 )}
-                            </div>
-                        ))}
+                        </div>
+                    ))}
 
                         {/* 正在输入指示器 */}
-                        {isTyping && (
-                            <div className="flex justify-start">
+                    {isTyping && (
+                        <div className="flex justify-start">
                                 <div className="bg-white border border-gray-200 p-3 rounded-lg shadow-sm">
                                     <div className="flex items-center space-x-2">
                                         <Bot className="w-4 h-4 text-gray-400" />
                                         <span className="text-sm text-gray-500">正在处理中</span>
-                                        <div className="flex space-x-1">
+                                    <div className="flex space-x-1">
                                             <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
                                             <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
                                             <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
@@ -470,9 +470,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                                 </div>
                             </div>
                         )}
-                    </div>
+                        </div>
                 </div>
-            </div>
+                </div>
 
             {/* 4. 输入区域 (固定80px) */}
             <div className="h-20 flex-shrink-0 border-t border-gray-200 bg-white">
@@ -525,14 +525,14 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                     <div className="flex gap-1 overflow-x-auto scrollbar-hide">
                         <span className="text-xs text-gray-500 whitespace-nowrap mr-2 self-center">💡 建议:</span>
                         {suggestions.map(suggestion => (
-                            <button
+                                <button
                                 key={suggestion}
                                 onClick={() => setInputMessage(suggestion)}
                                 className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 whitespace-nowrap transition-colors"
-                            >
+                                >
                                 {suggestion}
-                            </button>
-                        ))}
+                                </button>
+                            ))}
                     </div>
                 </div>
             </div>

@@ -234,7 +234,7 @@ export class CollaborationDatabaseService {
       }
 
       // 转换为ProjectWithLocation格式
-      const projects: ProjectWithLocation[] = (data || []).map(project => ({
+      const projects: ProjectWithLocation[] = (data || []).map((project: any) => ({
         ...project,
         geolocation: this.convertToProjectGeolocation(project),
         distance: userLocation && project.latitude && project.longitude
@@ -331,7 +331,7 @@ export class CollaborationDatabaseService {
       }
 
       // 转换为ProjectWithLocation格式并计算距离
-      const projects: ProjectWithLocation[] = (data || []).map(project => {
+      const projects: ProjectWithLocation[] = (data || []).map((project: any) => {
         const projectWithLocation: ProjectWithLocation = {
           ...project,
           geolocation: this.convertToProjectGeolocation(project)
@@ -425,10 +425,10 @@ export class CollaborationDatabaseService {
 
       // 计算统计数据
       const totalProjects = totalData?.length || 0;
-      const localProjects = modeStats?.filter(p => p.collaboration_mode === 'local_only').length || 0;
-      const remoteProjects = modeStats?.filter(p => p.collaboration_mode === 'remote_friendly').length || 0;
-      const hybridProjects = modeStats?.filter(p => p.collaboration_mode === 'location_flexible').length || 0;
-      const citiesCount = new Set(cityData?.map(p => p.city).filter(Boolean)).size;
+      const localProjects = modeStats?.filter((p: any) => p.collaboration_mode === 'local_only').length || 0;
+      const remoteProjects = modeStats?.filter((p: any) => p.collaboration_mode === 'remote_friendly').length || 0;
+      const hybridProjects = modeStats?.filter((p: any) => p.collaboration_mode === 'location_flexible').length || 0;
+      const citiesCount = new Set(cityData?.map((p: any) => p.city).filter(Boolean)).size;
 
       // 计算平均协作距离（简化计算）
       const { data: distanceData } = await supabase

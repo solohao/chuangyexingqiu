@@ -1057,7 +1057,7 @@ const CreateProject: React.FC = () => {
             </div>
             {images.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                {images.map((image, index) => (
+                {images.map((image: string, index: number) => (
                   <div key={index} className="relative">
                     <img
                       src={image}
@@ -1085,7 +1085,7 @@ const CreateProject: React.FC = () => {
               <input
                 type="url"
                 value={formData.demo_url}
-                onChange={(e) => handleInputChange('demo_url', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('demo_url', e.target.value)}
                 className="input"
                 placeholder="https://demo.example.com"
               />
@@ -1098,7 +1098,7 @@ const CreateProject: React.FC = () => {
               <input
                 type="url"
                 value={formData.website_url}
-                onChange={(e) => handleInputChange('website_url', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('website_url', e.target.value)}
                 className="input"
                 placeholder="https://www.example.com"
               />
@@ -1112,7 +1112,7 @@ const CreateProject: React.FC = () => {
             <input
               type="url"
               value={formData.social_links.github || ''}
-              onChange={(e) => handleInputChange('social_links', { ...formData.social_links, github: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('social_links', { ...formData.social_links, github: e.target.value })}
               className="input"
               placeholder="https://github.com/username/project"
             />
@@ -1126,7 +1126,7 @@ const CreateProject: React.FC = () => {
               <input
                 type="email"
                 value={formData.contact_email}
-                onChange={(e) => handleInputChange('contact_email', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('contact_email', e.target.value)}
                 className="input"
                 placeholder="contact@example.com"
                 required
@@ -1140,7 +1140,7 @@ const CreateProject: React.FC = () => {
               <input
                 type="tel"
                 value={formData.contact_phone}
-                onChange={(e) => handleInputChange('contact_phone', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('contact_phone', e.target.value)}
                 className="input"
                 placeholder="13800138000"
               />

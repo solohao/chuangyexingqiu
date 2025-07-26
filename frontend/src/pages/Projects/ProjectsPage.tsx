@@ -211,7 +211,7 @@ const ProjectsPage: React.FC = () => {
         return;
       }
 
-      setLikedProjects(prev => {
+      setLikedProjects((prev: Set<string>) => {
         const newSet = new Set(prev);
         if (newSet.has(projectId)) {
           newSet.delete(projectId);
@@ -237,7 +237,7 @@ const ProjectsPage: React.FC = () => {
         return;
       }
 
-      setBookmarkedProjects(prev => {
+      setBookmarkedProjects((prev: Set<string>) => {
         const newSet = new Set(prev);
         if (newSet.has(projectId)) {
           newSet.delete(projectId);
@@ -408,7 +408,7 @@ const ProjectsPage: React.FC = () => {
               ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
               : 'grid-cols-1'
               }`}>
-              {projects.map(project => (
+              {projects.map((project: any) => (
                 <ProjectCardEnhanced
                   key={project.id}
                   project={project}

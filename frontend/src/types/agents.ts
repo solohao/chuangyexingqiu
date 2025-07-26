@@ -12,10 +12,9 @@ import type {
 } from '../../../shared/types/agent.types';
 
 // 前端特定的智能体信息接口（兼容现有代码）
-export interface AgentInfo extends Omit<SharedAgentInfo, 'status' | 'type'> {
+export interface AgentInfo extends Omit<SharedAgentInfo, 'type'> {
+    type: AgentType; // 确保type字段必须存在
     isAvailable: boolean; // 兼容现有代码
-    status?: SharedAgentStatus;
-    type?: AgentType;
     icon: string; // 添加图标属性
     color: string; // 添加颜色属性
 }

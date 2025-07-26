@@ -23,7 +23,7 @@ import { AVAILABLE_AGENTS, AGENT_CATEGORIES, type AgentInfo } from '../types/age
 export class AgentRegistryService implements IAgentRegistry {
   private static instance: AgentRegistryService;
   
-  public agents: Map<string, AgentInfo>;
+  public agents: Map<string, SharedAgentInfo>;
   public categories: AgentCategory[];
   public configs: Map<string, AgentConfig>;
   
@@ -76,7 +76,7 @@ export class AgentRegistryService implements IAgentRegistry {
   /**
    * 根据分类获取智能体
    */
-  getAgentsByCategory(categoryId: string): AgentInfo[] {
+  getAgentsByCategory(categoryId: string): SharedAgentInfo[] {
     return Array.from(this.agents.values())
       .filter(agent => agent.category.id === categoryId)
       .sort((a, b) => {
@@ -94,7 +94,7 @@ export class AgentRegistryService implements IAgentRegistry {
   /**
    * 根据类型获取智能体
    */
-  getAgentsByType(type: AgentType): AgentInfo[] {
+  getAgentsByType(type: AgentType): SharedAgentInfo[] {
     return Array.from(this.agents.values())
       .filter(agent => agent.type === type);
   }
@@ -102,7 +102,7 @@ export class AgentRegistryService implements IAgentRegistry {
   /**
    * 获取可用智能体
    */
-  getAvailableAgents(): AgentInfo[] {
+  getAvailableAgents(): SharedAgentInfo[] {
     return Array.from(this.agents.values())
       .filter(agent => {
         const config = this.configs.get(agent.id);
@@ -113,7 +113,7 @@ export class AgentRegistryService implements IAgentRegistry {
   /**
    * 获取推荐智能体
    */
-  getRecommendedAgents(context?: ProjectContext): AgentInfo[] {
+  getRecommendedAgents(context?: ProjectContext): SharedAgentInfo[] {
     if (context) {
       this.projectContext = context;
     }

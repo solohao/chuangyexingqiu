@@ -111,10 +111,10 @@ const AgentCard: React.FC<{
               </button>
             </div>
           </div>
-          
+              
           {/* 操作按钮区域 - 根据模式显示不同的按钮 */}
           <div className="mt-2 pt-2 border-t border-gray-100">
-            {mode === 'orchestrated' ? (
+              {mode === 'orchestrated' ? (
               // 编排模式：显示两个操作按钮
               <div className="flex gap-2">
                 <button
@@ -161,7 +161,7 @@ const AgentCard: React.FC<{
                     </>
                   )}
                 </button>
-              </div>
+            </div>
             )}
           </div>
         </div>
@@ -313,15 +313,15 @@ const AgentCategorySection: React.FC<{
                 </div>
               )}
               
-              <AgentCard
-                agent={agent}
-                mode={mode}
-                isSelected={selectedAgentId === agent.id}
-                onSelect={onAgentSelect}
-                onAddToWorkflow={onAddToWorkflow}
-                onDirectChat={onDirectChat}
-                onShowDetails={onShowDetails}
-              />
+            <AgentCard
+              agent={agent}
+              mode={mode}
+              isSelected={selectedAgentId === agent.id}
+              onSelect={onAgentSelect}
+              onAddToWorkflow={onAddToWorkflow}
+              onDirectChat={onDirectChat}
+              onShowDetails={onShowDetails}
+            />
             </div>
           ))}
         </div>
@@ -547,67 +547,67 @@ export const AgentCatalog: React.FC<AgentCatalogProps> = ({
       {/* 可折叠的内容区域 */}
       {!isCollapsed && (
         <div className="flex flex-col" style={{ maxHeight: '220px' }}>
-          {/* 搜索框 */}
+      {/* 搜索框 */}
           <div className="flex-shrink-0 p-3 border-b border-gray-100">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="搜索智能体..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="搜索智能体..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+      </div>
 
           {/* 智能体列表 - 可滚动区域 */}
           <div className="flex-1 min-h-0 overflow-y-auto">
-            {searchQuery.trim() ? (
-              // 搜索结果
-              <div className="p-3 space-y-2">
-                {filteredAgents.length > 0 ? (
-                  filteredAgents.map(agent => (
-                    <AgentCard
-                      key={agent.id}
-                      agent={agent}
-                      mode={mode}
-                      isSelected={selectedAgentId === agent.id}
-                      onSelect={onAgentSelect}
-                      onAddToWorkflow={onAddToWorkflow}
-                      onDirectChat={onDirectChat}
-                      onShowDetails={handleShowDetails}
-                    />
-                  ))
-                ) : (
+        {searchQuery.trim() ? (
+          // 搜索结果
+          <div className="p-3 space-y-2">
+            {filteredAgents.length > 0 ? (
+              filteredAgents.map(agent => (
+                <AgentCard
+                  key={agent.id}
+                  agent={agent}
+                  mode={mode}
+                  isSelected={selectedAgentId === agent.id}
+                  onSelect={onAgentSelect}
+                  onAddToWorkflow={onAddToWorkflow}
+                  onDirectChat={onDirectChat}
+                  onShowDetails={handleShowDetails}
+                />
+              ))
+            ) : (
                   <div className="text-center py-6 text-gray-500">
                     <Search className="w-6 h-6 mx-auto mb-2 text-gray-300" />
-                    <p className="text-sm">未找到匹配的智能体</p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              // 分类列表
-              <div>
-                {categories.map(category => (
-                  <AgentCategorySection
-                    key={category.id}
-                    category={category}
-                    agents={agentsByCategory[category.id] || []}
-                    isExpanded={expandedCategories.has(category.id)}
-                    onToggle={() => toggleCategory(category.id)}
-                    mode={mode}
-                    selectedAgentId={selectedAgentId}
-                    onAgentSelect={onAgentSelect}
-                    onAddToWorkflow={onAddToWorkflow}
-                    onDirectChat={onDirectChat}
-                    onShowDetails={handleShowDetails}
-                    projectContext={projectContext}
-                  />
-                ))}
+                <p className="text-sm">未找到匹配的智能体</p>
               </div>
             )}
           </div>
+        ) : (
+          // 分类列表
+          <div>
+            {categories.map(category => (
+              <AgentCategorySection
+                key={category.id}
+                category={category}
+                agents={agentsByCategory[category.id] || []}
+                isExpanded={expandedCategories.has(category.id)}
+                onToggle={() => toggleCategory(category.id)}
+                mode={mode}
+                selectedAgentId={selectedAgentId}
+                onAgentSelect={onAgentSelect}
+                onAddToWorkflow={onAddToWorkflow}
+                onDirectChat={onDirectChat}
+                onShowDetails={handleShowDetails}
+                    projectContext={projectContext}
+              />
+            ))}
+          </div>
+        )}
+      </div>
         </div>
       )}
     </div>
