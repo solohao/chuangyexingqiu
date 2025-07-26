@@ -66,11 +66,11 @@ export class RequirementAnalysisService {
       });
 
       // 解析返回的JSON结果
-      if (typeof response.result === 'string') {
-        return JSON.parse(response.result);
+      if (typeof response.data === 'string') {
+        return JSON.parse(response.data);
       }
       
-      return response.result as RequirementAnalysisResult;
+      return response.data as RequirementAnalysisResult;
     } catch (error) {
       console.error('需求分析失败:', error);
       throw new Error('需求分析服务暂时不可用，请稍后重试');

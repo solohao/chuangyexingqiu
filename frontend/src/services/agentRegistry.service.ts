@@ -164,18 +164,18 @@ export class AgentRegistryService implements IAgentRegistry {
       let score = agent.userRating; // 基础评分
 
       // 项目类型匹配
-      if (projectType === 'saas' && agent.type === 'tech-development') score += 2;
-      if (projectType === 'ecommerce' && agent.type === 'market-analysis') score += 2;
-      if (projectType === 'fintech' && agent.type === 'finance-analysis') score += 2;
+      if (projectType === 'saas' && agent.type === 'tech_stack_agent') score += 2;
+      if (projectType === 'ecommerce' && agent.type === 'market_research_agent') score += 2;
+      if (projectType === 'fintech' && agent.type === 'financial_model_agent') score += 2;
 
       // 行业匹配
-      if (industry === 'technology' && agent.type === 'tech-development') score += 1.5;
-      if (industry === 'finance' && agent.type === 'finance-analysis') score += 1.5;
+      if (industry === 'technology' && agent.type === 'tech_stack_agent') score += 1.5;
+      if (industry === 'finance' && agent.type === 'financial_model_agent') score += 1.5;
 
       // 项目阶段匹配
       if (stage === 'idea' && agent.id === 'business_canvas_agent') score += 2;
-      if (stage === 'mvp' && agent.type === 'tech-development') score += 1.5;
-      if (stage === 'growth' && agent.type === 'market-analysis') score += 1.5;
+      if (stage === 'mvp' && agent.type === 'tech_stack_agent') score += 1.5;
+      if (stage === 'growth' && agent.type === 'market_research_agent') score += 1.5;
 
       // 最近使用历史
       if (recentAgentUsage.includes(agent.id)) score += 1;
