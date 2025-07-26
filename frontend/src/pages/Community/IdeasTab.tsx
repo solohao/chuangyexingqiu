@@ -84,7 +84,7 @@ const IdeasTab: React.FC = () => {
   const [ideas] = useState<Idea[]>(mockIdeas);
   const [activeSort, setActiveSort] = useState<SortKey>('hot');
 
-  const sortOptions: { key: SortKey; label: string; icon: React.ElementType }[] = [
+  const sortOptions: { key: SortKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { key: 'hot', label: '热门', icon: Flame },
     { key: 'newest', label: '最新', icon: Sparkles },
     { key: 'featured', label: '精华', icon: Award },

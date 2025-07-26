@@ -8,7 +8,7 @@ import { useUiStore } from '../../store/uiStore';
 
 type CommunityTab = 'ideas' | 'skills' | 'requests' | 'events';
 
-const communityTabs: { id: CommunityTab; label: string; icon: React.ElementType }[] = [
+const communityTabs: { id: CommunityTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'ideas', label: '创意市场', icon: Lightbulb },
   { id: 'skills', label: '大师工坊', icon: Wrench },
   { id: 'requests', label: '功能需求', icon: Bot },

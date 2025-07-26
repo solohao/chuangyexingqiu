@@ -33,7 +33,7 @@ const ProjectViewControls: React.FC<ProjectViewControlsProps> = ({
 }) => {
   const [showSortDropdown, setShowSortDropdown] = React.useState(false);
 
-  const sortOptions: { value: ProjectSortBy; label: string; icon: React.ElementType }[] = [
+  const sortOptions: { value: ProjectSortBy; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { value: 'latest', label: '最新发布', icon: Clock },
     { value: 'popular', label: '最受欢迎', icon: Eye },
     { value: 'funding', label: '融资金额', icon: TrendingUp },

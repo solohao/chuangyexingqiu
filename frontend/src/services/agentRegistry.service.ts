@@ -17,13 +17,27 @@ import type {
 
 import { AVAILABLE_AGENTS, AGENT_CATEGORIES, type AgentInfo } from '../types/agents';
 
+// 类型转换函数
+function convertToFrontendAgentInfo(sharedAgent: SharedAgentInfo): AgentInfo {
+  return {
+    ...sharedAgent,
+    isAvailable: sharedAgent.status === 'available',
+    icon: '🤖', // 默认图标
+    color: '#3B82F6' // 默认颜色
+  };
+}
+
+function convertToFrontendAgentInfoArray(sharedAgents: SharedAgentInfo[]): AgentInfo[] {
+  return sharedAgents.map(convertToFrontendAgentInfo);
+}
+
 /**
  * 智能体注册表实现类
  */
 export class AgentRegistryService implements IAgentRegistry {
   private static instance: AgentRegistryService;
   
-  public agents: Map<string, SharedAgentInfo>;
+  public agents: Map<string, AgentInfo>;
   public categories: AgentCategory[];
   public configs: Map<string, AgentConfig>;
   
@@ -76,7 +90,7 @@ export class AgentRegistryService implements IAgentRegistry {
   /**
    * 根据分类获取智能体
    */
-  getAgentsByCategory(categoryId: string): SharedAgentInfo[] {
+  getAgentsByCategory(categoryId: string): AgentInfo[] {
     return Array.from(this.agents.values())
       .filter(agent => agent.category.id === categoryId)
       .sort((a, b) => {
@@ -94,7 +108,7 @@ export class AgentRegistryService implements IAgentRegistry {
   /**
    * 根据类型获取智能体
    */
-  getAgentsByType(type: AgentType): SharedAgentInfo[] {
+  getAgentsByType(type: AgentType): AgentInfo[] {
     return Array.from(this.agents.values())
       .filter(agent => agent.type === type);
   }
@@ -102,7 +116,7 @@ export class AgentRegistryService implements IAgentRegistry {
   /**
    * 获取可用智能体
    */
-  getAvailableAgents(): SharedAgentInfo[] {
+  getAvailableAgents(): AgentInfo[] {
     return Array.from(this.agents.values())
       .filter(agent => {
         const config = this.configs.get(agent.id);
@@ -113,7 +127,7 @@ export class AgentRegistryService implements IAgentRegistry {
   /**
    * 获取推荐智能体
    */
-  getRecommendedAgents(context?: ProjectContext): SharedAgentInfo[] {
+  getRecommendedAgents(context?: ProjectContext): AgentInfo[] {
     if (context) {
       this.projectContext = context;
     }

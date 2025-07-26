@@ -80,7 +80,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 };
 
 interface FilterSelectProps {
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string }>;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   options: { value: string; label: string }[];
