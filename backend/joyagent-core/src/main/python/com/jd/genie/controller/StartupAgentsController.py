@@ -298,6 +298,63 @@ async def generate_business_canvas(request: AgentAnalysisRequest):
         )
 
 
+@router.post("/swot-analysis-stream")
+async def analyze_swot_stream(request: AgentAnalysisRequest):
+    """SWOT分析流式接口"""
+    from fastapi.responses import StreamingResponse
+    
+    async def generate_stream():
+        try:
+            logger.info(f"开始流式SWOT分析: {request.query}")
+            
+            # 创建智能体
+            agent = AgentFactory.create_agent("swot_analysis")
+            if not agent:
+                yield f"data: {json.dumps({'type': 'error', 'error': '智能体创建失败'})}\n\n"
+                yield "data: [DONE]\n\n"
+                return
+            
+            # 准备参数
+            parameters = {
+                "project_info": request.project_info or request.query
+            }
+            
+            # 检查智能体是否支持流式执行
+            if hasattr(agent, 'execute_stream'):
+                # 使用流式执行
+                async for chunk in agent.execute_stream(parameters):
+                    yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+            else:
+                # 回退到非流式执行
+                yield f"data: {json.dumps({'type': 'start', 'message': '开始SWOT分析...'})}\n\n"
+                
+                result = await agent.run(request.query, parameters)
+                
+                if result.get("success"):
+                    yield f"data: {json.dumps({'type': 'result', 'data': result['result']})}\n\n"
+                    yield f"data: {json.dumps({'type': 'complete', 'message': 'SWOT分析完成'})}\n\n"
+                else:
+                    yield f"data: {json.dumps({'type': 'error', 'error': result.get('error', '分析失败')})}\n\n"
+            
+            yield "data: [DONE]\n\n"
+            
+        except Exception as e:
+            logger.error(f"流式SWOT分析错误: {e}")
+            yield f"data: {json.dumps({'type': 'error', 'error': str(e)})}\n\n"
+            yield "data: [DONE]\n\n"
+    
+    return StreamingResponse(
+        generate_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
+
+
 @router.post("/business-canvas-stream")
 async def generate_business_canvas_stream(request: AgentAnalysisRequest):
     """商业模式画布流式接口"""

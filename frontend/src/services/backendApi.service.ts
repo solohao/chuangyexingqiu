@@ -1059,8 +1059,40 @@ export class BackendApiService {
     request: AgentAnalysisRequest,
     onProgress?: (event: any) => void
   ): Promise<ApiResponse> {
-    // 暂时回退到非流式版本
-    return await this.performSWOTAnalysis(request);
+    try {
+      console.log('发送流式SWOT分析请求:', request);
+
+      const response = await fetch(`${this.joyagentUrl}/swot-analysis-stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache'
+        },
+        body: JSON.stringify({
+          query: request.query,
+          project_info: request.project_info || request.query,
+          project_type: request.project_type || '',
+          location: request.location || '',
+          project_stage: request.project_stage || '',
+          industry: request.industry || '',
+          project_description: request.project_description || '',
+          business_idea: request.business_idea || ''
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('SWOT分析API错误:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+
+      // 处理流式响应（带回调）
+      return await this.handleSSEResponseWithCallback(response, 'swot_analysis', onProgress);
+    } catch (error) {
+      console.error('SWOT分析失败:', error);
+      throw error;
+    }
   }
 
   /**

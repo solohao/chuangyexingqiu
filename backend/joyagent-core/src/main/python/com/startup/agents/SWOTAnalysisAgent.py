@@ -50,6 +50,39 @@ class SWOTAnalysisAgent(BaseAgent):
                 "success": False,
                 "error": str(e)
             }
+
+    async def execute_stream(self, parameters: Dict[str, Any]):
+        """执行SWOT分析 - 流式版本"""
+        try:
+            project_info = parameters.get("project_info", "")
+            
+            if not project_info:
+                yield {
+                    "type": "error",
+                    "error": "project_info parameter is required"
+                }
+                return
+            
+            logger.info(f"开始流式LLM SWOT分析: {project_info[:100]}...")
+            
+            # 发送开始事件
+            yield {
+                "type": "start",
+                "message": "开始SWOT分析...",
+                "agent": self.name
+            }
+            
+            # 使用流式LLM进行SWOT分析
+            async for chunk in self._perform_swot_analysis_with_llm_stream(project_info):
+                yield chunk
+            
+        except Exception as e:
+            logger.error(f"SWOTAnalysisAgent stream execution error: {e}")
+            yield {
+                "type": "error",
+                "error": str(e),
+                "agent": self.name
+            }
     
     async def _perform_swot_analysis_with_llm(self, project_info: str) -> Dict[str, Any]:
         """使用LLM进行SWOT分析"""
@@ -70,25 +103,90 @@ class SWOTAnalysisAgent(BaseAgent):
             
             logger.info(f"LLM SWOT响应: {response[:200]}...")
             
-            # 尝试解析JSON响应
-            try:
-                json_start = response.find('{')
-                json_end = response.rfind('}') + 1
-                
-                if json_start != -1 and json_end > json_start:
-                    json_str = response[json_start:json_end]
-                    swot_result = json.loads(json_str)
-                    return swot_result
-                else:
-                    return self._parse_swot_response(response)
-                    
-            except json.JSONDecodeError as e:
-                logger.warning(f"SWOT JSON解析失败: {e}, 使用备用解析方法")
-                return self._parse_swot_response(response)
+            # 由于提示词已改为直接输出格式化文本，直接返回响应
+            return {"formatted_content": response}
                 
         except Exception as e:
             logger.error(f"LLM SWOT分析失败: {e}, 使用备用分析方法")
             return self._fallback_swot_analysis(project_info)
+
+    async def _perform_swot_analysis_with_llm_stream(self, project_info: str):
+        """使用LLM进行流式SWOT分析"""
+        try:
+            # 构建Prompt
+            system_prompt = StartupPrompts.SWOT_ANALYSIS_SYSTEM
+            user_prompt = StartupPrompts.SWOT_ANALYSIS_USER.format(
+                project_info=project_info
+            )
+            
+            # 发送进度事件
+            yield {
+                "type": "progress",
+                "message": "正在调用AI分析服务...",
+                "stage": "llm_call"
+            }
+            
+            # 使用流式LLM调用 - 真正的边接收边显示
+            full_response = ""
+            chunk_count = 0
+            
+            async for chunk in llm_service.generate_response_stream(
+                prompt=user_prompt,
+                system_prompt=system_prompt,
+                temperature=0.7,
+                max_tokens=2000
+            ):
+                chunk_count += 1
+                full_response += chunk
+                
+                # 每个chunk都实时发送，实现真正的流式显示
+                yield {
+                    "type": "stream",
+                    "content": chunk,  # 发送当前chunk内容
+                    "accumulated_content": full_response,  # 发送累积内容
+                    "chunk_index": chunk_count,
+                    "stage": "streaming"
+                }
+            
+            logger.info(f"LLM SWOT流式响应完成，总共{chunk_count}个chunks，{len(full_response)}字符")
+            
+            # 发送流式完成事件
+            yield {
+                "type": "stream_complete",
+                "message": f"SWOT分析完成，共生成 {len(full_response)} 字符",
+                "total_chunks": chunk_count,
+                "final_content": full_response
+            }
+            
+            # 发送完成事件
+            yield {
+                "type": "complete",
+                "message": "SWOT分析流程完成",
+                "total_chunks": chunk_count,
+                "response_length": len(full_response)
+            }
+                
+        except Exception as e:
+            logger.error(f"LLM流式SWOT分析失败: {e}")
+            # 使用备用分析
+            yield {
+                "type": "progress",
+                "message": "AI服务异常，使用备用分析方法...",
+                "stage": "fallback"
+            }
+            
+            fallback_result = self._fallback_swot_analysis(project_info)
+            yield {
+                "type": "result",
+                "data": fallback_result,
+                "message": "SWOT分析完成（使用备用方法）"
+            }
+            
+            yield {
+                "type": "complete",
+                "message": "SWOT分析流程完成（备用模式）",
+                "fallback": True
+            }
     
     def _parse_swot_response(self, response: str) -> Dict[str, Any]:
         """解析SWOT响应"""

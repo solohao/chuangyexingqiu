@@ -1,0 +1,42 @@
+{
+  "id": "session_1753744732915_jemmby4y9",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "您好！我是创业助手，可以协调多个专业智能体为您服务。请问需要什么帮助？",
+      "messageId": "1",
+      "id": "1",
+      "type": "ai",
+      "timestamp": "2025-07-28T23:13:52.915Z"
+    },
+    {
+      "role": "system",
+      "content": "已切换到直接模式，正在与SWOT分析智能体对话",
+      "messageId": "1753744736631_hazrusy81",
+      "id": "1753744736631_hazrusy81",
+      "type": "system",
+      "timestamp": "2025-07-28T23:18:56.631Z"
+    },
+    {
+      "role": "user",
+      "content": "我想打造一个创业平台，为独立开发者提供资源，请你分析",
+      "messageId": "1753744765912_ft588iyfm",
+      "id": "1753744765912_ft588iyfm",
+      "type": "user",
+      "timestamp": "2025-07-28T23:19:25.912Z"
+    },
+    {
+      "role": "assistant",
+      "content": "SWOT分析正在分析中...",
+      "messageId": "1753744765913_xg9rwbrqa",
+      "id": "1753744765913_xg9rwbrqa",
+      "type": "ai",
+      "timestamp": "2025-07-28T23:19:25.913Z"
+    }
+  ],
+  "lastUpdated": "2025-07-29T07:22:23.716464",
+  "projectId": "project1",
+  "mode": "direct",
+  "sessionId": "session_1753744732915_jemmby4y9",
+  "agentId": "swot_analysis_agent"
+}
