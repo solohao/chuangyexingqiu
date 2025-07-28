@@ -28,8 +28,10 @@ export type AgentType =
   | 'market_research_agent'
   | 'tech_stack_agent'
   | 'financial_model_agent'
+  | 'requirement_analysis_agent'
   | 'react'
-  | 'plan_executor';
+  | 'plan_executor'
+  | 'system';
 
 // 智能体分类
 export interface AgentCategory {

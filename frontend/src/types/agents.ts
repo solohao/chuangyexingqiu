@@ -91,6 +91,28 @@ export const AGENT_CATEGORIES: AgentCategory[] = [
 
 // 基于后端智能体的配置
 export const AVAILABLE_AGENTS: AgentInfo[] = [
+    // 需求分析智能体
+    {
+        id: 'requirement_analysis',
+        name: '需求分析',
+        description: '专业分析创业项目需求，评估可行性和复杂度，为项目规划提供数据支持',
+        type: 'requirement_analysis_agent',
+        category: AGENT_CATEGORIES.find(c => c.id === 'business-strategy')!,
+        capabilities: ['需求分析', '可行性评估', '项目规划', '复杂度评估'],
+        status: 'available',
+        averageResponseTime: 2500,
+        successRate: 0.96,
+        userRating: 4.8,
+        usageCount: 1200,
+        lastUsed: new Date('2024-01-15'),
+        isRecommended: true,
+        isPopular: true,
+        tags: ['需求分析', '可行性评估', '项目规划'],
+        examples: ['分析我的创业项目需求', '评估项目的可行性'],
+        isAvailable: true,
+        icon: '🔍',
+        color: '#3B82F6'
+    },
     // 商业策略智能体
     {
         id: 'business_canvas_agent',

@@ -2,7 +2,7 @@
 
 import '../types/message';
 import { agentRegistry } from './agentRegistry.service';
-import { backendApiService } from './backendApi.service';
+import { backendApiService, type ApiResponse } from './backendApi.service';
 import type { AgentInfo, AgentCategory, AgentType } from '../types/agents';
 import type { ProjectContext } from '../../../shared/types/agent.types';
 
@@ -140,7 +140,7 @@ export class AgentService {
       agentTypes: agentTypes as any[],
       projectContext: context,
       requestId,
-      stream: false
+      stream: true // 默认使用流式响应
     });
   }
 
@@ -151,15 +151,26 @@ export class AgentService {
     agentId: string,
     task: string,
     context?: ProjectContext
-  ) {
+  ): Promise<ApiResponse> {
     const requestId = this.generateRequestId();
-    const analysisRequest = {
-      task,
-      projectContext: context,
+    
+    // 构建符合后端AgentAnalysisRequest格式的请求
+    const analysisRequest: any = {
+      query: task,
+      project_description: task,
+      analysis_type: "comprehensive",
+      business_idea: task, // 商业模式画布需要
+      project_info: task,  // SWOT分析需要
+      project_type: context?.projectType || "",
+      location: "",
+      project_stage: context?.stage || "",
+      industry: context?.industry || "",
       requestId
     };
 
     switch (agentId) {
+      case 'requirement_analysis':
+        return await backendApiService.analyzeRequirement(analysisRequest);
       case 'business_canvas_agent':
         return await backendApiService.analyzeBusinessCanvas(analysisRequest);
       case 'swot_analysis_agent':
@@ -168,6 +179,47 @@ export class AgentService {
         return await backendApiService.matchPolicies(analysisRequest);
       case 'incubator_agent':
         return await backendApiService.recommendIncubators(analysisRequest);
+      default:
+        throw new Error(`不支持的智能体: ${agentId}`);
+    }
+  }
+
+  /**
+   * 调用单个智能体 - 流式版本
+   */
+  async callAgentStream(
+    agentId: string,
+    task: string,
+    context?: ProjectContext,
+    onProgress?: (event: any) => void
+  ): Promise<ApiResponse> {
+    const requestId = this.generateRequestId();
+    
+    // 构建符合后端AgentAnalysisRequest格式的请求
+    const analysisRequest: any = {
+      query: task,
+      project_description: task,
+      analysis_type: "comprehensive",
+      business_idea: task, // 商业模式画布需要
+      project_info: task,  // SWOT分析需要
+      project_type: context?.projectType || "",
+      location: "",
+      project_stage: context?.stage || "",
+      industry: context?.industry || "",
+      requestId
+    };
+
+    switch (agentId) {
+      case 'requirement_analysis':
+        return await backendApiService.analyzeRequirementStream(analysisRequest, onProgress);
+      case 'business_canvas_agent':
+        return await backendApiService.analyzeBusinessCanvasStream(analysisRequest, onProgress);
+      case 'swot_analysis_agent':
+        return await backendApiService.performSWOTAnalysisStream(analysisRequest, onProgress);
+      case 'policy_matching_agent':
+        return await backendApiService.matchPoliciesStream(analysisRequest, onProgress);
+      case 'incubator_agent':
+        return await backendApiService.recommendIncubatorsStream(analysisRequest, onProgress);
       default:
         throw new Error(`不支持的智能体: ${agentId}`);
     }
