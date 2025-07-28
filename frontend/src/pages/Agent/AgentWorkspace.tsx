@@ -1056,6 +1056,11 @@ const AgentWorkspace: React.FC<AgentWorkspaceProps> = ({ projectId }) => {
                 };
                 setMessages(prev => [...prev, initialAiResponse]);
 
+                // 定义智能体格式化内容的标识符
+                const AGENT_CONTENT_INDICATORS = ['📋', '🎨', '📊', '⚖️'];
+                const hasFormattedContent = (content: string) => 
+                    AGENT_CONTENT_INDICATORS.some(indicator => content.includes(indicator));
+
                 // 流式进度回调函数 - 简化版本，基于当前消息内容累积
                 const onProgress = (event: any) => {
                     const { type, data } = event;
@@ -1079,7 +1084,7 @@ const AgentWorkspace: React.FC<AgentWorkspaceProps> = ({ projectId }) => {
                                         newContent = `${agentName}分析中：[${stage}] ${message}\n\n${formattedContent}`;
                                     } else {
                                         // 只更新状态信息，保持现有的AI内容
-                                        if (newContent.includes('📋') || newContent.includes('🎨') || newContent.includes('📊')) {
+                                        if (hasFormattedContent(newContent)) {
                                             // 保持格式化的AI内容，只更新状态行
                                             const contentLines = newContent.split('\n');
                                             const statusLine = `${agentName}分析中：[${stage}] ${message}`;
@@ -1114,7 +1119,7 @@ const AgentWorkspace: React.FC<AgentWorkspaceProps> = ({ projectId }) => {
                                 case 'result':
                                     // 后端已经不再发送result事件，这个case保留用于兼容性
                                     // 如果收到result事件，只更新状态不重复显示内容
-                                    if (newContent.includes('📋') || newContent.includes('🎨') || newContent.includes('📊')) {
+                                    if (hasFormattedContent(newContent)) {
                                         // 保持现有格式化内容不变
                                         // newContent 保持不变
                                     } else {
@@ -1125,7 +1130,7 @@ const AgentWorkspace: React.FC<AgentWorkspaceProps> = ({ projectId }) => {
 
                                 case 'complete':
                                     // 保持当前内容不变，只在没有任何内容时才显示完成消息
-                                    if (!newContent.includes('📋') && !newContent.includes('🎨') && !newContent.includes('📊')) {
+                                    if (!hasFormattedContent(newContent)) {
                                         newContent = `${agentName}分析完成！\n\n${data.message || ''}`;
                                     }
                                     // 如果已经有格式化内容，保持不变
