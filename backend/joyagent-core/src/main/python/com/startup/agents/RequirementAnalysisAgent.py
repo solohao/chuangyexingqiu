@@ -9,11 +9,12 @@ import json
 from typing import Dict, Any, Optional
 from loguru import logger
 from .base_agent import BaseAgent
+from .streaming.StreamingAgentMixin import StreamingAgentMixin
 from .prompts.StartupPrompts import StartupPrompts
 from com.jd.genie.agent.llm.LLMService import llm_service
 
 
-class RequirementAnalysisAgent(BaseAgent):
+class RequirementAnalysisAgent(BaseAgent, StreamingAgentMixin):
     """需求分析智能体"""
     
     def __init__(self):
@@ -56,7 +57,7 @@ class RequirementAnalysisAgent(BaseAgent):
             }
     
     async def execute_stream(self, parameters: Dict[str, Any]):
-        """执行需求分析 - 流式版本"""
+        """执行需求分析 - 流式版本（使用通用流式组件）"""
         try:
             project_description = parameters.get("project_description", "")
             analysis_type = parameters.get("analysis_type", "comprehensive")
@@ -70,15 +71,23 @@ class RequirementAnalysisAgent(BaseAgent):
             
             logger.info(f"开始流式LLM需求分析: {project_description[:100]}...")
             
-            # 发送开始事件
-            yield {
-                "type": "start",
-                "message": "开始需求分析...",
-                "agent": self.name
-            }
+            # 构建提示词
+            system_prompt = StartupPrompts.REQUIREMENT_ANALYSIS_SYSTEM
+            user_prompt = StartupPrompts.REQUIREMENT_ANALYSIS_USER.format(
+                project_description=project_description,
+                analysis_type=analysis_type
+            )
             
-            # 使用流式LLM进行需求分析
-            async for chunk in self._analyze_requirements_with_llm_stream(project_description, analysis_type):
+            # 使用通用流式组件
+            async for chunk in self.execute_stream_with_llm(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                agent_name="需求分析",
+                temperature=0.7,
+                max_tokens=3000,
+                project_description=project_description,
+                analysis_type=analysis_type
+            ):
                 yield chunk
             
         except Exception as e:
@@ -88,6 +97,12 @@ class RequirementAnalysisAgent(BaseAgent):
                 "error": str(e),
                 "agent": self.name
             }
+    
+    async def _get_fallback_result(self, **kwargs):
+        """获取备用分析结果（供StreamingAgentMixin使用）"""
+        project_description = kwargs.get("project_description", "")
+        analysis_type = kwargs.get("analysis_type", "comprehensive")
+        return await self._fallback_analysis(project_description, analysis_type)
     
     async def _analyze_requirements_with_llm(self, project_description: str, analysis_type: str) -> Dict[str, Any]:
         """使用LLM进行需求分析"""
