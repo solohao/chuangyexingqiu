@@ -1,93 +1,56 @@
-import { Routes, Route, useLocation } from 'react-router-dom'
-import { Suspense, lazy } from 'react'
-
-// 布局组件
-import Header from './components/layout/Header'
-import Footer from './components/layout/Footer'
+import React, { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import routes from './config/routes';
+import { chatSessionService } from './services/chatSessionService';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
 import PublishModal from './components/common/PublishModal';
+import './index.css';
 
-// 认证组件
-import ProtectedRoute from './components/auth/ProtectedRoute'; // 恢复导入
+function App() {
+  const location = useLocation();
+  
+  // 初始化：将本地会话同步到后端
+  useEffect(() => {
+    const syncLocalSessions = async () => {
+      try {
+        console.log('正在同步本地会话到后端...');
+        await chatSessionService.syncLocalSessionsToBackend();
+        console.log('本地会话同步完成');
+      } catch (error) {
+        console.error('同步本地会话到后端失败:', error);
+      }
+    };
+    
+    syncLocalSessions();
+  }, []);
 
-// 懒加载页面组件
-const HomePage = lazy(() => import('./pages/Home/HomePage'))
-const ProjectDetail = lazy(() => import('./pages/Projects/ProjectDetail'))
-const ProjectsPage = lazy(() => import('./pages/Projects/ProjectsPage'))
-const CreateProject = lazy(() => import('./pages/Projects/CreateProject'))
-const AgentPage = lazy(() => import('./pages/Agent/AgentPage'))
-const MakerCommunityPage = lazy(() => import('./pages/MakerCommunity/MakerCommunityPage'))
-const SkillsMarketPage = lazy(() => import('./pages/SkillsMarket/SkillsMarketPage'))
-const DevCenterPage = lazy(() => import('./pages/DevCenter/DevCenterPage'))
-const CommunityLayout = lazy(() => import('./pages/Community/CommunityLayout'))
-const LoginPage = lazy(() => import('./pages/Auth/LoginPage'))
-const RegisterPage = lazy(() => import('./pages/Auth/RegisterPage'))
-const AuthCallback = lazy(() => import('./pages/Auth/AuthCallback'))
-const ResetPasswordPage = lazy(() => import('./pages/Auth/ResetPasswordPage'))
-
-const ProfilePage = lazy(() => import('./pages/Auth/ProfilePage'))
-const EditProfilePage = lazy(() => import('./pages/Auth/EditProfilePage.tsx'))
-
-// 加载状态组件
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="text-primary-600 text-xl font-semibold">加载中...</div>
-  </div>
-)
-
-function AppLayout() {
-  const location = useLocation()
-  const isHomePage = location.pathname === '/'
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register'
-
+  // 判断是否需要显示Header和Footer
+  const isHomePage = location.pathname === '/';
+  const isAuthPage = location.pathname === '/login' || 
+                     location.pathname === '/register' || 
+                     location.pathname.startsWith('/auth/');
+  
+  // 需要全屏显示的页面（不显示Footer）
+  const isFullScreenPage = location.pathname === '/agent';
+  
+  const shouldShowLayout = !isHomePage && !isAuthPage;
+  const shouldShowFooter = shouldShowLayout && !isFullScreenPage;
+  
   return (
-    <div className="flex flex-col min-h-screen w-full">
-      {!isHomePage && !isAuthPage && <Header />}
-      <main className="flex-grow w-full overflow-hidden">
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            {/* 公共路由 */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
-            
-            {/* 新增的主导航路由 */}
-            <Route path="/projects" element={<ProjectsPage />} />
-            <Route path="/projects/create" element={
-              <ProtectedRoute>
-                <CreateProject />
-              </ProtectedRoute>
-            } />
-            <Route path="/project/:id" element={<ProjectDetail />} />
-            <Route path="/agent" element={<AgentPage />} />
-            <Route path="/maker-community" element={<MakerCommunityPage />} />
-            <Route path="/skills-market" element={<SkillsMarketPage />} />
-            <Route path="/dev-center" element={<DevCenterPage />} />
-            
-            {/* 受保护的路由 - 恢复保护 */}
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } />
-            <Route path="/profile/edit" element={
-              <ProtectedRoute>
-                <EditProfilePage />
-              </ProtectedRoute>
-            } />
-            <Route path="/community/*" element={
-              <ProtectedRoute>
-                <CommunityLayout />
-              </ProtectedRoute>
-            } />
-          </Routes>
-        </Suspense>
+    <div className={`flex flex-col w-full ${isFullScreenPage ? 'h-screen' : 'min-h-screen'}`}>
+      {shouldShowLayout && <Header />}
+      <main className={`flex-grow w-full ${shouldShowLayout ? '' : 'overflow-hidden'} ${isFullScreenPage ? 'overflow-hidden' : ''}`}>
+        <Routes>
+          {routes.map((route: { path: string; element: React.ReactNode }) => (
+            <Route key={route.path} path={route.path} element={route.element} />
+          ))}
+        </Routes>
       </main>
-      {!isHomePage && !isAuthPage && <Footer />}
+      {shouldShowFooter && <Footer />}
       <PublishModal />
     </div>
-  )
+  );
 }
 
-export default AppLayout
+export default App;

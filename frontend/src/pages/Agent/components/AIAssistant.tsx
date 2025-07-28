@@ -57,6 +57,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
     const [showRequirementAnalysis, setShowRequirementAnalysis] = useState(false);
     const [currentQuery, setCurrentQuery] = useState('');
     const [clarificationQuestions, setClarificationQuestions] = useState<any[]>([]);
+    const [analysisCompleted, setAnalysisCompleted] = useState(false);
 
     // 使用需求分析Hook
     const {
@@ -137,7 +138,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
 
         // 添加模式切换消息
         const switchMessage: Message = {
-            id: Date.now().toString(),
+            id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             type: 'system',
             content: `已切换到${newMode === 'orchestrated' ? '编排模式' : '直接模式'}`,
             timestamp: new Date()
@@ -151,7 +152,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
             setSelectedAgentId(agent.id);
             // 添加切换消息
             const switchMessage: Message = {
-                id: Date.now().toString(),
+                id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 type: 'system',
                 content: `已切换到${agent.name}对话`,
                 timestamp: new Date()
@@ -171,7 +172,55 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
     // 处理需求分析完成
     const handleAnalysisComplete = (result: any) => {
         console.log('需求分析完成:', result);
-        // 可以在这里处理分析结果，比如自动推荐智能体等
+        
+        // 检查是否已经完成分析，避免重复处理
+        if (analysisCompleted) {
+            console.log('分析已完成，跳过重复处理');
+            return;
+        }
+        
+        // 标记分析已完成
+        setAnalysisCompleted(true);
+        
+        // 延迟隐藏需求分析组件，让用户看到结果
+        setTimeout(() => {
+            setShowRequirementAnalysis(false);
+        }, 2000);
+        
+        // 添加简洁的分析完成消息
+        const completionMessage: Message = {
+            id: `completion_${Date.now()}`,
+            type: 'ai',
+            content: '✅ 需求分析完成！基于您的需求，我已为您生成详细的分析报告。',
+            timestamp: new Date()
+        };
+        setMessages(prev => [...prev, completionMessage]);
+
+        // 如果有推荐的智能体，显示推荐信息
+        if (result.recommendedAgents && result.recommendedAgents.length > 0) {
+            setTimeout(() => {
+                const recommendationMessage: Message = {
+                    id: `recommendation_${Date.now()}`,
+                    type: 'ai',
+                    content: `🤖 推荐智能体：${result.recommendedAgents.join('、')}`,
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, recommendationMessage]);
+            }, 500);
+        }
+
+        // 添加下一步建议
+        if (result.nextSteps && result.nextSteps.length > 0) {
+            setTimeout(() => {
+                const nextStepsMessage: Message = {
+                    id: `nextsteps_${Date.now()}`,
+                    type: 'ai',
+                    content: `💡 建议的下一步：\n${result.nextSteps.slice(0, 3).map((step, index) => `${index + 1}. ${step}`).join('\n')}`,
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, nextStepsMessage]);
+            }, 1000);
+        }
     };
 
     // 处理澄清需求
@@ -184,7 +233,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
     const handleClarificationAnswer = async (answer: string) => {
         // 添加用户回答到消息中
         const answerMessage: Message = {
-            id: Date.now().toString(),
+            id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             type: 'user',
             content: answer,
             timestamp: new Date()
@@ -202,7 +251,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
         setMode('direct');
         setSelectedAgentId(agent.id);
         const chatMessage: Message = {
-            id: Date.now().toString(),
+            id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             type: 'system',
             content: `正在与${agent.name}对话`,
             timestamp: new Date()
@@ -215,7 +264,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
         if (!inputMessage.trim()) return;
 
         const userMessage: Message = {
-            id: Date.now().toString(),
+            id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             type: 'user',
             content: inputMessage,
             timestamp: new Date()
@@ -242,80 +291,54 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
     // 处理编排模式响应
     const handleOrchestratedResponse = async (userInput: string) => {
         try {
+            // 重置之前的分析状态
+            resetAnalysis();
+            setAnalysisCompleted(false);
+            
             // 设置当前查询并显示需求分析
             setCurrentQuery(userInput);
             setShowRequirementAnalysis(true);
 
             // 显示分析开始消息
             const analysisStartMessage: Message = {
-                id: Date.now().toString(),
+                id: `analysis_start_${Date.now()}`,
                 type: 'ai',
-                content: '正在分析您的需求，请稍候...',
+                content: '🔍 正在分析您的需求，请稍候...',
                 timestamp: new Date()
             };
             setMessages(prev => [...prev, analysisStartMessage]);
 
-            // 执行需求分析
-            await analyzeRequirement(userInput, 'full');
-
-            // 检查是否需要澄清
-            const needsClarification = await checkNeedsClarification(userInput);
-
-            if (needsClarification) {
-                const clarificationMessage: Message = {
-                    id: (Date.now() + 1).toString(),
+            // 模拟分析过程的流式更新
+            setTimeout(() => {
+                const processMessage: Message = {
+                    id: `analysis_process_${Date.now()}`,
                     type: 'ai',
-                    content: '我需要了解更多信息来更好地帮助您。请查看下方的需求分析结果，并回答相关问题。',
+                    content: '📊 正在评估项目复杂度和所需资源...',
                     timestamp: new Date()
                 };
-                setMessages(prev => [...prev, clarificationMessage]);
-                return;
-            }
+                setMessages(prev => [...prev, processMessage]);
+            }, 1000);
 
-            // 获取推荐的智能体
-            const recommendedAgentIds = await recommendAgents(userInput);
-
-            // 显示意图分析结果
-            const analysisMessage: Message = {
-                id: (Date.now() + 2).toString(),
-                type: 'ai',
-                content: `需求分析完成！正在启动多智能体工作流，预计调用 ${recommendedAgentIds.length} 个智能体...`,
-                timestamp: new Date()
-            };
-            setMessages(prev => [...prev, analysisMessage]);
-
-            // 执行工作流
-            const agentTypes = recommendedAgentIds; // 直接使用推荐的智能体ID数组
-            const workflowResult = await agentService.executeWorkflow(
-                userInput,
-                agentTypes,
-                projectContext
-            );
-
-            // 转换并显示工作流可视化
-            const workflowViz = convertWorkflowResult(workflowResult);
-            setCurrentWorkflow(workflowViz);
-
-            // 显示工作流结果消息
-            const resultMessage: Message = {
-                id: (Date.now() + 1).toString(),
-                type: 'ai',
-                content: workflowResult.status === 'completed'
-                    ? `工作流执行完成！已成功调用 ${Object.keys(workflowResult.results).length} 个智能体，为您提供了全面的分析结果。`
-                    : `工作流执行${workflowResult.status === 'failed' ? '失败' : '异常'}：${workflowResult.error || '未知错误'}`,
-                timestamp: new Date()
-            };
-            setMessages(prev => [...prev, resultMessage]);
+            setTimeout(() => {
+                const agentMessage: Message = {
+                    id: `analysis_agents_${Date.now()}`,
+                    type: 'ai',
+                    content: '🤖 正在匹配最适合的专业智能体...',
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, agentMessage]);
+            }, 2000);
 
         } catch (error) {
             console.error('编排模式响应失败:', error);
             const errorMessage: Message = {
-                id: Date.now().toString(),
+                id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 type: 'ai',
-                content: `抱歉，处理您的请求时出现了错误：${error instanceof Error ? error.message : '未知错误'}`,
+                content: `❌ 抱歉，处理您的请求时出现了错误：${error instanceof Error ? error.message : '未知错误'}`,
                 timestamp: new Date()
             };
             setMessages(prev => [...prev, errorMessage]);
+            setShowRequirementAnalysis(false);
         }
     };
 
@@ -326,7 +349,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                 const result = await agentService.callAgent(selectedAgentId, userInput, projectContext);
 
                 const aiResponse: Message = {
-                    id: Date.now().toString(),
+                    id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     type: 'ai',
                     content: result.data ?
                         `${agentService.getAgentById(selectedAgentId)?.name}的分析结果：\n\n${JSON.stringify(result.data, null, 2)}` :
@@ -336,7 +359,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                 setMessages(prev => [...prev, aiResponse]);
             } else {
                 const aiResponse: Message = {
-                    id: Date.now().toString(),
+                    id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     type: 'ai',
                     content: '请先选择一个智能体进行对话',
                     timestamp: new Date()
@@ -346,7 +369,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
         } catch (error) {
             console.error('直接模式响应失败:', error);
             const errorMessage: Message = {
-                id: Date.now().toString(),
+                id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 type: 'ai',
                 content: `抱歉，调用智能体时出现了错误：${error instanceof Error ? error.message : '未知错误'}`,
                 timestamp: new Date()
@@ -357,8 +380,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
 
     // 创建模拟工作流（保留作为备用）
     const createMockWorkflow = () => {
+        const workflowId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         const workflow: WorkflowVisualization = {
-            id: Date.now().toString(),
+            id: workflowId,
             title: '商业模式分析',
             progress: 0,
             status: 'running',
@@ -376,7 +400,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
         setCurrentWorkflow(workflow);
 
         const systemMessage: Message = {
-            id: (Date.now() + 1).toString(),
+            id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             type: 'system',
             content: '正在为您分析，已启动多智能体工作流...',
             timestamp: new Date(),
@@ -388,7 +412,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
         // 模拟工作流进度
         setTimeout(() => {
             const agentMessage: Message = {
-                id: (Date.now() + 2).toString(),
+                id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 type: 'agent',
                 content: '我来帮您分析商业模式的九大要素。首先，让我了解一下您的目标客户群体...',
                 timestamp: new Date(),

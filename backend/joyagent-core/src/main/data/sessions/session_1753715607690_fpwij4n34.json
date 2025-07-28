@@ -1,0 +1,98 @@
+{
+  "id": "session_1753715607690_fpwij4n34",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "您好！我是创业助手，可以协调多个专业智能体为您服务。请问需要什么帮助？",
+      "messageId": "1",
+      "id": "1",
+      "type": "ai",
+      "timestamp": "2025-07-28T15:08:27.691Z"
+    },
+    {
+      "role": "user",
+      "content": "我想打造一个创业Agent，为创业者提供专家级的分析指导，请你分析",
+      "messageId": "1753715734572_lj9t0bh30",
+      "id": "1753715734572_lj9t0bh30",
+      "type": "user",
+      "timestamp": "2025-07-28T15:15:34.572Z"
+    },
+    {
+      "role": "assistant",
+      "content": "🔍 正在分析您的需求，请稍候...",
+      "messageId": "analysis_start_1753715734572",
+      "id": "analysis_start_1753715734572",
+      "type": "ai",
+      "timestamp": "2025-07-28T15:15:34.572Z"
+    },
+    {
+      "role": "assistant",
+      "content": "📊 正在评估项目复杂度和所需资源...",
+      "messageId": "analysis_process_1753715735573",
+      "id": "analysis_process_1753715735573",
+      "type": "ai",
+      "timestamp": "2025-07-28T15:15:35.573Z"
+    },
+    {
+      "role": "assistant",
+      "content": "🤖 正在匹配最适合的专业智能体...",
+      "messageId": "analysis_agents_1753715736573",
+      "id": "analysis_agents_1753715736573",
+      "type": "ai",
+      "timestamp": "2025-07-28T15:15:36.573Z"
+    },
+    {
+      "role": "system",
+      "content": "已切换到直接模式，正在与需求分析智能体对话",
+      "messageId": "1753715780823_71h1msgmj",
+      "id": "1753715780823_71h1msgmj",
+      "type": "system",
+      "timestamp": "2025-07-28T15:16:20.823Z"
+    },
+    {
+      "role": "system",
+      "content": "已切换到直接模式",
+      "messageId": "1753715788247_xeue7keu0",
+      "id": "1753715788247_xeue7keu0",
+      "type": "system",
+      "timestamp": "2025-07-28T15:16:28.247Z"
+    },
+    {
+      "role": "system",
+      "content": "已切换到直接模式",
+      "messageId": "1753715789286_5fea0eq0h",
+      "id": "1753715789286_5fea0eq0h",
+      "type": "system",
+      "timestamp": "2025-07-28T15:16:29.286Z"
+    },
+    {
+      "role": "system",
+      "content": "已切换到直接模式",
+      "messageId": "1753715790085_i002glxyc",
+      "id": "1753715790085_i002glxyc",
+      "type": "system",
+      "timestamp": "2025-07-28T15:16:30.085Z"
+    },
+    {
+      "role": "system",
+      "content": "已切换到直接模式",
+      "messageId": "1753715790106_sdm87pmdp",
+      "id": "1753715790106_sdm87pmdp",
+      "type": "system",
+      "timestamp": "2025-07-28T15:16:30.106Z"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ 需求分析完成！基于您的需求，我已为您生成详细的分析报告。",
+      "messageId": "completion_1753715799781",
+      "id": "completion_1753715799781",
+      "type": "ai",
+      "timestamp": "2025-07-28T15:16:39.781Z"
+    }
+  ],
+  "lastUpdated": "2025-07-28T23:16:41.654551",
+  "projectId": "project1",
+  "mode": "direct",
+  "sessionId": "session_1753715607690_fpwij4n34",
+  "agentId": "requirement_analysis"
+}

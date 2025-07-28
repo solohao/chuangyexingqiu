@@ -26,6 +26,7 @@ export const RequirementAnalysis: React.FC<RequirementAnalysisProps> = ({
   const [analysis, setAnalysis] = useState<RequirementAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showFullDetails, setShowFullDetails] = useState(false);
 
   useEffect(() => {
     if (query.trim()) {
@@ -38,7 +39,10 @@ export const RequirementAnalysis: React.FC<RequirementAnalysisProps> = ({
     setError(null);
     
     try {
+      console.log('RequirementAnalysis组件开始分析:', query);
       const result = await requirementAnalysisService.analyzeRequirement(query, 'full');
+      console.log('RequirementAnalysis组件分析结果:', result);
+      
       setAnalysis(result);
       
       // 通知父组件分析完成
@@ -49,7 +53,15 @@ export const RequirementAnalysis: React.FC<RequirementAnalysisProps> = ({
         onClarificationNeeded?.(result.suggestions.questions);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '分析失败');
+      console.error('RequirementAnalysis组件分析失败:', err);
+      const errorMessage = err instanceof Error ? err.message : '分析失败';
+      setError(errorMessage);
+      
+      // 通知父组件分析失败
+      onAnalysisComplete?.({
+        query,
+        error: errorMessage
+      });
     } finally {
       setLoading(false);
     }
@@ -73,10 +85,15 @@ export const RequirementAnalysis: React.FC<RequirementAnalysisProps> = ({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center space-x-3">
           <Brain className="h-5 w-5 text-blue-500 animate-pulse" />
-          <span className="text-gray-600">正在分析需求...</span>
+          <span className="text-gray-600">🔍 正在分析您的需求...</span>
+          <div className="flex space-x-1 ml-2">
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" />
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+          </div>
         </div>
       </div>
     );
@@ -97,11 +114,76 @@ export const RequirementAnalysis: React.FC<RequirementAnalysisProps> = ({
     return null;
   }
 
+  // 简洁版本的分析结果
+  if (!showFullDetails) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Brain className="h-5 w-5 text-blue-500" />
+            <h3 className="text-base font-semibold text-gray-900">需求分析结果</h3>
+          </div>
+          <button
+            onClick={() => setShowFullDetails(true)}
+            className="text-sm text-blue-600 hover:text-blue-700 underline"
+          >
+            查看详细分析
+          </button>
+        </div>
+
+        {/* 核心信息摘要 */}
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          {analysis.intent && (
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <div className="font-medium text-blue-900 mb-1">项目目标</div>
+              <div className="text-blue-700 text-xs">{analysis.intent.mainGoal}</div>
+            </div>
+          )}
+          
+          {analysis.complexity && (
+            <div className="bg-orange-50 p-3 rounded-lg">
+              <div className="font-medium text-orange-900 mb-1">复杂度评估</div>
+              <div className="text-orange-700 text-xs">
+                {analysis.complexity.level} - {analysis.complexity.estimatedTime}
+              </div>
+            </div>
+          )}
+          
+          {analysis.recommendedAgents && analysis.recommendedAgents.length > 0 && (
+            <div className="bg-purple-50 p-3 rounded-lg">
+              <div className="font-medium text-purple-900 mb-1">推荐智能体</div>
+              <div className="text-purple-700 text-xs">
+                {analysis.recommendedAgents.slice(0, 2).join('、')}
+                {analysis.recommendedAgents.length > 2 && ` 等${analysis.recommendedAgents.length}个`}
+              </div>
+            </div>
+          )}
+          
+          {analysis.clarity && (
+            <div className="bg-green-50 p-3 rounded-lg">
+              <div className="font-medium text-green-900 mb-1">需求明确度</div>
+              <div className="text-green-700 text-xs">{analysis.clarity.score}分 - {analysis.clarity.level}</div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 详细版本的分析结果
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
-      <div className="flex items-center space-x-3">
-        <Brain className="h-6 w-6 text-blue-500" />
-        <h3 className="text-lg font-semibold text-gray-900">需求分析结果</h3>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <Brain className="h-6 w-6 text-blue-500" />
+          <h3 className="text-lg font-semibold text-gray-900">详细需求分析结果</h3>
+        </div>
+        <button
+          onClick={() => setShowFullDetails(false)}
+          className="text-sm text-gray-600 hover:text-gray-700 underline"
+        >
+          收起详情
+        </button>
       </div>
 
       {/* 意图分析 */}

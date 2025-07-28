@@ -1,5 +1,38 @@
 # ===========================================
-# 创业星球多智能体系统 - Python依赖包
+# 创业星球多智能体系统 - 依赖包配置
+# ===========================================
+
+# ===========================================
+# Java环境依赖 (JoyAgent-Core服务)
+# ===========================================
+# 
+# Java环境要求：
+# - Java JDK 11+ (推荐 OpenJDK 17)
+# - Apache Maven 3.6+
+#
+# Windows安装命令：
+# 1. 安装Java (使用Scoop):
+#    iwr -useb get.scoop.sh | iex
+#    scoop bucket add java
+#    scoop install openjdk17
+# 2. 安装Maven (手动安装):
+#    下载: https://archive.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.zip
+#    解压到: C:\maven\apache-maven-3.9.9
+#    添加到PATH: C:\maven\apache-maven-3.9.9\bin
+#
+# 已安装版本：
+# - Java: OpenJDK 17.0.2
+# - Maven: 3.9.9
+#
+# 验证安装：
+# java -version
+# mvn -version
+#
+# Maven国内镜像配置 (可选，加速依赖下载):
+# 在 %USERPROFILE%\.m2\settings.xml 中配置阿里云镜像
+#
+# ===========================================
+# Python依赖包
 # ===========================================
 
 # 系统管理和进程监控
@@ -49,3 +82,151 @@ redis>=4.5.0
 
 # 可选：如果需要消息队列
 celery>=5.3.0
+
+# ===========================================
+# AI和多智能体系统依赖
+# ===========================================
+
+# OpenAI API客户端
+openai>=1.3.0
+
+# 其他AI模型API支持
+anthropic>=0.7.0
+
+# LangChain框架 (暂时不需要)
+# langchain>=0.1.0
+# langchain-openai>=0.0.5
+# langchain-community>=0.0.10
+
+# 向量数据库和嵌入
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
+
+# 智能体框架 (暂时不需要)
+# autogen>=0.2.0
+
+# 文本分割和处理
+tiktoken>=0.5.0
+
+# JSON处理和验证
+jsonschema>=4.17.0
+
+# 异步任务处理
+asyncio-mqtt>=0.13.0
+
+# WebSocket支持 (用于实时通信)
+websockets>=11.0.0
+
+# 数据科学和分析
+numpy>=1.24.0
+pandas>=2.0.0
+
+# 机器学习工具
+scikit-learn>=1.3.0
+
+# 自然语言处理
+nltk>=3.8.0
+spacy>=3.6.0
+
+# 图像处理 (如果需要多模态AI)
+pillow>=10.0.0
+
+# 音频处理 (如果需要语音AI)
+speechrecognition>=3.10.0
+pydub>=0.25.0
+
+# 网络爬虫和数据获取
+beautifulsoup4>=4.12.0
+scrapy>=2.10.0
+
+# 时间处理
+python-dateutil>=2.8.0
+
+# 加密和安全
+cryptography>=41.0.0
+pyjwt>=2.8.0
+
+# 配置管理
+configparser>=5.3.0
+
+# 多线程和并发 (Python 3.2+ 内置，无需安装)
+# concurrent.futures 已内置
+
+# 内存优化
+memory-profiler>=0.61.0
+
+# ===========================================
+# 后端服务特定依赖 (Genie-Tool & Genie-Client)
+# ===========================================
+
+# 服务器发送事件支持
+sse-starlette>=2.4.1
+
+# JSON修复工具
+json-repair>=0.47.6
+
+# 大语言模型统一接口
+litellm>=1.74.0
+
+# 数据可视化
+matplotlib>=3.10.0
+
+# Excel文件处理
+openpyxl>=3.1.5
+
+# 多部分表单数据处理
+python-multipart>=0.0.20
+
+# 小型智能体框架
+smolagents>=1.19.0
+
+# SQL模型
+sqlmodel>=0.0.24
+
+# 模型上下文协议
+mcp==1.9.4
+
+# 异步SQLite
+aiosqlite>=0.21.0
+
+# 数学和图形处理相关依赖
+contourpy>=1.0.1
+cycler>=0.10
+fonttools>=4.22.0
+kiwisolver>=1.3.1
+pyparsing>=2.3.1
+
+# Excel文件处理相关
+et-xmlfile>=2.0.0
+
+# ===========================================
+# JoyAgent-Core Python版本特定依赖
+# ===========================================
+
+# 异步编程支持 (Python 3.4+ 内置)
+# asyncio>=3.4.3
+
+# 类型注解扩展
+typing-extensions>=4.0.0
+
+# 模板引擎 (如果需要)
+jinja2>=3.1.0
+
+# 数据类支持 (Python 3.7+ 内置)
+# dataclasses>=0.6
+
+# 注意：以下依赖已在上面的通用依赖中包含：
+# - loguru>=0.7.0 (日志管理)
+# - pydantic>=2.0.0 (数据验证和序列化)
+# - asyncio (Python内置异步编程库)
+# - typing-extensions>=4.0.0 (类型注解扩展)
+
+# ===========================================
+# 安装说明
+# ===========================================
+# 
+# 使用国内镜像源安装所有Python依赖：
+# pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/
+#
+# 或者使用阿里云镜像：
+# pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/

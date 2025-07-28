@@ -1,0 +1,42 @@
+{
+  "id": "session_1753715865064_biguymckf",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "您好！我是创业助手，可以协调多个专业智能体为您服务。请问需要什么帮助？",
+      "messageId": "1",
+      "id": "1",
+      "type": "ai",
+      "timestamp": "2025-07-28T15:12:45.064Z"
+    },
+    {
+      "role": "system",
+      "content": "已切换到直接模式，正在与需求分析智能体对话",
+      "messageId": "1753715869065_uod0sm841",
+      "id": "1753715869065_uod0sm841",
+      "type": "system",
+      "timestamp": "2025-07-28T15:17:49.065Z"
+    },
+    {
+      "role": "user",
+      "content": "我想打造一款创业Agent,为创业者提供专家级的指导与服务，请你分析",
+      "messageId": "1753715902468_5ys39ymem",
+      "id": "1753715902468_5ys39ymem",
+      "type": "user",
+      "timestamp": "2025-07-28T15:18:22.468Z"
+    },
+    {
+      "role": "assistant",
+      "content": "需求分析分析失败：未收到分析结果",
+      "messageId": "1753715902468_g9d155pxb",
+      "id": "1753715902468_g9d155pxb",
+      "type": "ai",
+      "timestamp": "2025-07-28T15:18:22.468Z"
+    }
+  ],
+  "lastUpdated": "2025-07-28T23:23:02.555893",
+  "projectId": "project1",
+  "mode": "direct",
+  "sessionId": "session_1753715865064_biguymckf",
+  "agentId": "requirement_analysis"
+}

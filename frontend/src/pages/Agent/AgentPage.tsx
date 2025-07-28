@@ -3,6 +3,7 @@ import { Bot, Terminal } from 'lucide-react';
 import ProjectSidebar from './components/ProjectSidebar';
 import StartupDashboard from './components/StartupDashboard';
 import AIAssistant from './components/AIAssistant';
+import AgentWorkspace from './AgentWorkspace';
 import ResizablePanel from '../../components/common/ResizablePanel';
 
 interface Project {
@@ -20,6 +21,18 @@ interface Project {
 
 const AgentPage: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [useNewLayout, setUseNewLayout] = useState(true); // 控制是否使用新布局
+  
+  // 默认使用新布局，直接返回AgentWorkspace
+  if (useNewLayout) {
+    return (
+      <div style={{ height: '100%' }}>
+        <AgentWorkspace projectId={selectedProject?.id} />
+      </div>
+    );
+  }
+
+  // 以下是原有的布局代码（保留作为备用）
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'team' | 'tasks' | 'analytics'>('overview');
   const [showTerminal, setShowTerminal] = useState(false);
@@ -33,7 +46,9 @@ const AgentPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex bg-gray-100" style={{ height: 'calc(100vh - 80px)' }}>
+    <div className="w-full flex bg-gray-100" style={{ height: '100%' }}>
+
+
       {/* 三列布局：项目管理器(20%) | 主内容区(55%) | AI助手(25%) */}
       <ResizablePanel
         direction="horizontal"
