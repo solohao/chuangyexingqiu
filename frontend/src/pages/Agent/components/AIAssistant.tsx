@@ -215,7 +215,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ projectId }) => {
                 const nextStepsMessage: Message = {
                     id: `nextsteps_${Date.now()}`,
                     type: 'ai',
-                    content: `💡 建议的下一步：\n${result.nextSteps.slice(0, 3).map((step, index) => `${index + 1}. ${step}`).join('\n')}`,
+                    content: `💡 建议的下一步：\n${result.nextSteps.slice(0, 3).map((step: string, index: number) => `${index + 1}. ${step}`).join('\n')}`,
                     timestamp: new Date()
                 };
                 setMessages(prev => [...prev, nextStepsMessage]);

@@ -59,9 +59,8 @@ export const RequirementAnalysis: React.FC<RequirementAnalysisProps> = ({
       
       // 通知父组件分析失败
       onAnalysisComplete?.({
-        query,
-        error: errorMessage
-      });
+        query
+      } as RequirementAnalysisResult);
     } finally {
       setLoading(false);
     }

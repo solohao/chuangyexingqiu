@@ -21,12 +21,12 @@ class ConversationState(TypedDict):
     request_id: str
     user_query: str
     
-    # 项目上下文
+    # 项目上下文 - 增强的上下文管理
     project_context: Dict[str, Any]
     project_description: str
     project_type: str
     
-    # 智能体结果存储
+    # 智能体结果存储 - 结构化存储
     agent_results: Dict[str, Any]
     
     # 当前智能体信息
@@ -45,6 +45,11 @@ class ConversationState(TypedDict):
     # 流式输出控制
     is_streaming: bool
     stream_events: List[Dict[str, Any]]
+    
+    # 对话历史和上下文传递 - 新增
+    conversation_history: List[Dict[str, Any]]
+    context_summary: str  # 当前对话的上下文摘要
+    shared_context: Dict[str, Any]  # 智能体间共享的上下文
     
     # 元数据
     metadata: Dict[str, Any]
@@ -82,6 +87,9 @@ def create_initial_state(
         completed_agents=[],
         is_streaming=is_streaming,
         stream_events=[],
+        conversation_history=[],
+        context_summary="",
+        shared_context={},
         metadata={},
         created_at=now,
         updated_at=now
@@ -148,3 +156,128 @@ def should_continue_workflow(state: ConversationState) -> bool:
         state["workflow_stage"] != "completed" and
         len(state["completed_agents"]) < len(state["requested_agents"])
     )
+
+
+def build_context_for_agent(state: ConversationState, agent_name: str) -> str:
+    """为特定智能体构建上下文信息"""
+    context_parts = []
+    
+    # 基础项目信息
+    context_parts.append(f"项目描述: {state['project_description'] or state['user_query']}")
+    
+    if state.get("project_type"):
+        context_parts.append(f"项目类型: {state['project_type']}")
+    
+    # 添加之前智能体的分析结果
+    if state["agent_results"]:
+        context_parts.append("\n=== 之前的分析结果 ===")
+        
+        for completed_agent, result in state["agent_results"].items():
+            if completed_agent != agent_name and isinstance(result, dict):
+                if "content" in result:
+                    # 提取内容的关键部分
+                    content = result["content"]
+                    if len(content) > 500:
+                        content = content[:500] + "..."
+                    context_parts.append(f"\n{completed_agent}分析结果:\n{content}")
+                elif "result" in result and isinstance(result["result"], dict):
+                    # 结构化结果的摘要
+                    result_data = result["result"]
+                    if "project_overview" in result_data:
+                        overview = result_data["project_overview"]
+                        if isinstance(overview, dict):
+                            context_parts.append(f"\n{completed_agent}项目概览:")
+                            context_parts.append(f"- 描述: {overview.get('description', '')}")
+                            context_parts.append(f"- 分类: {overview.get('category', '')}")
+                            context_parts.append(f"- 复杂度: {overview.get('complexity', '')}")
+                    
+                    if "functional_requirements" in result_data:
+                        func_reqs = result_data["functional_requirements"]
+                        if isinstance(func_reqs, list) and func_reqs:
+                            context_parts.append(f"\n主要功能需求: {', '.join(func_reqs[:3])}")
+    
+    # 添加对话历史摘要
+    if state.get("context_summary"):
+        context_parts.append(f"\n=== 对话上下文 ===\n{state['context_summary']}")
+    
+    return "\n".join(context_parts)
+
+
+def update_context_summary(state: ConversationState, agent_name: str, result: Dict[str, Any]) -> ConversationState:
+    """更新对话上下文摘要"""
+    summary_parts = []
+    
+    # 保留现有摘要的关键部分
+    if state.get("context_summary"):
+        existing_summary = state["context_summary"]
+        if len(existing_summary) > 200:
+            existing_summary = existing_summary[:200] + "..."
+        summary_parts.append(existing_summary)
+    
+    # 添加新的分析结果摘要
+    if result.get("success") and "result" in result:
+        result_data = result["result"]
+        if isinstance(result_data, dict):
+            if "project_overview" in result_data:
+                overview = result_data["project_overview"]
+                if isinstance(overview, dict):
+                    summary_parts.append(f"{agent_name}: {overview.get('description', '')[:100]}...")
+            elif "content" in result_data:
+                content = result_data["content"]
+                summary_parts.append(f"{agent_name}: {content[:100]}...")
+    elif result.get("content"):
+        content = result["content"]
+        summary_parts.append(f"{agent_name}: {content[:100]}...")
+    
+    # 更新状态
+    state["context_summary"] = "\n".join(summary_parts)
+    return state
+
+
+def add_to_conversation_history(
+    state: ConversationState, 
+    role: str, 
+    content: str, 
+    agent_name: str = "",
+    metadata: Dict[str, Any] = None
+) -> ConversationState:
+    """添加到对话历史"""
+    history_entry = {
+        "role": role,
+        "content": content,
+        "agent": agent_name,
+        "timestamp": datetime.now().isoformat(),
+        "metadata": metadata or {}
+    }
+    
+    state["conversation_history"].append(history_entry)
+    
+    # 限制历史记录长度，保持最近的20条
+    if len(state["conversation_history"]) > 20:
+        state["conversation_history"] = state["conversation_history"][-20:]
+    
+    return state
+
+
+def get_relevant_context_for_agent(state: ConversationState, agent_name: str) -> Dict[str, Any]:
+    """获取与特定智能体相关的上下文"""
+    relevant_context = {
+        "project_info": state.get("project_description", "") or state.get("user_query", ""),
+        "project_type": state.get("project_type", ""),
+        "previous_analyses": {},
+        "conversation_context": state.get("context_summary", "")
+    }
+    
+    # 根据智能体类型添加相关的前置分析结果
+    if agent_name == "swot_analysis_agent":
+        # SWOT分析需要需求分析的结果
+        if "requirement_analysis_agent" in state["agent_results"]:
+            relevant_context["previous_analyses"]["requirement_analysis"] = state["agent_results"]["requirement_analysis_agent"]
+    
+    elif agent_name == "business_canvas_agent":
+        # 商业画布需要需求分析和SWOT分析的结果
+        for dep_agent in ["requirement_analysis_agent", "swot_analysis_agent"]:
+            if dep_agent in state["agent_results"]:
+                relevant_context["previous_analyses"][dep_agent.replace("_agent", "")] = state["agent_results"][dep_agent]
+    
+    return relevant_context

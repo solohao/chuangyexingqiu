@@ -1,0 +1,17 @@
+{
+  "id": "session_1753751699915_s7vbvbvqb",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "您好！我是创业助手，可以协调多个专业智能体为您服务。请问需要什么帮助？",
+      "messageId": "1",
+      "id": "1",
+      "type": "ai",
+      "timestamp": "2025-07-29T01:09:59.915Z"
+    }
+  ],
+  "lastUpdated": "2025-07-29T09:14:59.929226",
+  "projectId": "project1",
+  "mode": "orchestrated",
+  "sessionId": "session_1753751699915_s7vbvbvqb"
+}

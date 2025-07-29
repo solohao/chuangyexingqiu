@@ -2,26 +2,19 @@
 # -*- coding: utf-8 -*-
 """
 需求分析智能体
-基于LangGraph的重构版本，原生支持工作流和独立执行
+创业星球专用智能体 - 集成LLM的真正AI对话
 """
 
 import json
 from typing import Dict, Any, Optional
 from loguru import logger
-
-from .LangGraphAgent import LangGraphAgent
-
-# 避免循环导入
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from .workflow.ConversationState import ConversationState
-else:
-    ConversationState = dict
+from .base_agent import BaseAgent
+from .streaming.StreamingAgentMixin import StreamingAgentMixin
 from .prompts.StartupPrompts import StartupPrompts
 from com.jd.genie.agent.llm.LLMService import llm_service
 
 
-class RequirementAnalysisAgent(LangGraphAgent):
+class RequirementAnalysisAgent(BaseAgent, StreamingAgentMixin):
     """需求分析智能体"""
     
     def __init__(self):
@@ -30,121 +23,41 @@ class RequirementAnalysisAgent(LangGraphAgent):
             description="需求分析智能体，专门用于分析创业项目的需求和可行性"
         )
     
-    # ==================== LangGraph接口实现 ====================
-    
-    def extract_parameters_from_state(self, state: ConversationState) -> Dict[str, Any]:
-        """从对话状态中提取参数"""
-        # 基础项目描述
-        project_description = state.get("project_description", "") or state.get("user_message", "")
-        
-        # 如果有项目类型，添加到描述中
-        if state.get("project_type"):
-            project_description += f"\n项目类型: {state['project_type']}"
-        
-        # 如果有用户查询，添加到描述中
-        if state.get("user_query") and state.get("user_query") != project_description:
-            project_description += f"\n用户需求: {state['user_query']}"
-        
-        # 检查是否有其他智能体的结果可以作为参考
-        analysis_results = state.get("analysis_results", {})
-        context_info = []
-        
-        if "swot_analysis" in analysis_results:
-            context_info.append("参考SWOT分析结果进行更深入的需求分析")
-        
-        if "business_canvas" in analysis_results:
-            context_info.append("参考商业模式画布进行需求细化")
-        
-        parameters = {
-            "project_description": project_description,
-            "analysis_type": "comprehensive"
-        }
-        
-        if context_info:
-            parameters["context_info"] = "\n".join(context_info)
-        
-        return parameters
-    
-    def update_state_with_result(self, state: ConversationState, result: Dict[str, Any]) -> ConversationState:
-        """使用分析结果更新对话状态"""
-        from .workflow.ConversationState import add_agent_result, add_to_conversation_history, update_context_summary
-        
-        if result.get("success"):
-            # 更新智能体结果
-            state = add_agent_result(state, self.name, result.get("result", {}))
-            
-            # 添加到对话历史
-            content = "需求分析完成"
-            if result.get("result") and isinstance(result["result"], dict):
-                if "content" in result["result"]:
-                    content = result["result"]["content"][:200] + "..."
-                elif "project_overview" in result["result"]:
-                    overview = result["result"]["project_overview"]
-                    if isinstance(overview, dict):
-                        content = f"需求分析完成 - {overview.get('description', '')[:100]}..."
-            
-            state = add_to_conversation_history(
-                state, 
-                "assistant", 
-                content, 
-                self.name,
-                {"analysis_type": "requirement", "success": True}
-            )
-            
-            # 更新上下文摘要
-            state = update_context_summary(state, self.name, result)
-            
-            logger.info("需求分析结果已更新到对话状态")
-        else:
-            # 处理错误情况
-            error_msg = f"需求分析失败: {result.get('error', '未知错误')}"
-            
-            state = add_to_conversation_history(
-                state,
-                "assistant", 
-                error_msg,
-                self.name,
-                {"analysis_type": "requirement", "success": False, "error": True}
-            )
-            
-            logger.error(error_msg)
-        
-        # 更新当前智能体和时间戳
-        state["current_agent"] = self.name
-        state["updated_at"] = self._get_current_timestamp()
-        
-        return state
-    
-    # ==================== 核心执行逻辑 ====================
+
     
     async def execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """执行需求分析"""
-        self.log_execution_start("标准模式")
-        
+        """执行需求分析 - 使用LLM进行真正的AI分析"""
         try:
             project_description = parameters.get("project_description", "")
             analysis_type = parameters.get("analysis_type", "comprehensive")
             
             if not project_description:
-                return self.create_error_result("project_description parameter is required")
+                return {
+                    "success": False,
+                    "error": "project_description parameter is required"
+                }
             
             logger.info(f"开始LLM需求分析: {project_description[:100]}...")
             
             # 使用LLM进行需求分析
             analysis_result = await self._analyze_requirements_with_llm(project_description, analysis_type)
             
-            self.log_execution_complete("标准模式", True)
-            return self.create_success_result(analysis_result, "需求分析完成")
+            return {
+                "success": True,
+                "result": analysis_result,
+                "tool": "requirement_analysis",
+                "analysis_type": analysis_type
+            }
             
         except Exception as e:
             logger.error(f"RequirementAnalysisAgent execution error: {e}")
-            self.log_execution_complete("标准模式", False)
-            return self.create_error_result(str(e))
+            return {
+                "success": False,
+                "error": str(e)
+            }
     
     async def execute_stream(self, parameters: Dict[str, Any]):
-        """执行需求分析 - 流式版本"""
-        self.log_execution_start("流式模式")
-        
+        """执行需求分析 - 流式版本（使用通用流式组件）"""
         try:
             project_description = parameters.get("project_description", "")
             analysis_type = parameters.get("analysis_type", "comprehensive")
@@ -177,18 +90,13 @@ class RequirementAnalysisAgent(LangGraphAgent):
             ):
                 yield chunk
             
-            self.log_execution_complete("流式模式", True)
-            
         except Exception as e:
             logger.error(f"RequirementAnalysisAgent stream execution error: {e}")
-            self.log_execution_complete("流式模式", False)
             yield {
                 "type": "error",
                 "error": str(e),
                 "agent": self.name
             }
-    
-    # ==================== 内部方法 ====================
     
     async def _get_fallback_result(self, **kwargs):
         """获取备用分析结果（供StreamingAgentMixin使用）"""
@@ -295,6 +203,85 @@ class RequirementAnalysisAgent(LangGraphAgent):
         
         return items[:5] if items else [f"基于{keyword}的分析结果"]
     
+    async def _analyze_requirements_with_llm_stream(self, project_description: str, analysis_type: str):
+        """使用LLM进行流式需求分析"""
+        try:
+            # 构建Prompt
+            system_prompt = StartupPrompts.REQUIREMENT_ANALYSIS_SYSTEM
+            user_prompt = StartupPrompts.REQUIREMENT_ANALYSIS_USER.format(
+                project_description=project_description,
+                analysis_type=analysis_type
+            )
+            
+            # 发送进度事件
+            yield {
+                "type": "progress",
+                "message": "正在调用AI分析服务...",
+                "stage": "llm_call"
+            }
+            
+            # 使用流式LLM调用 - 真正的边接收边显示
+            full_response = ""
+            chunk_count = 0
+            
+            async for chunk in llm_service.generate_response_stream(
+                prompt=user_prompt,
+                system_prompt=system_prompt,
+                temperature=0.7,
+                max_tokens=3000
+            ):
+                chunk_count += 1
+                full_response += chunk
+                
+                # 每个chunk都实时发送，实现真正的流式显示
+                yield {
+                    "type": "stream",
+                    "content": chunk,  # 发送当前chunk内容
+                    "accumulated_content": full_response,  # 发送累积内容
+                    "chunk_index": chunk_count,
+                    "stage": "streaming"
+                }
+            
+            logger.info(f"LLM流式响应完成，总共{chunk_count}个chunks，{len(full_response)}字符")
+            
+            # 发送流式完成事件
+            yield {
+                "type": "stream_complete",
+                "message": f"需求分析完成，共生成 {len(full_response)} 字符",
+                "total_chunks": chunk_count,
+                "final_content": full_response
+            }
+            
+            # 发送完成事件
+            yield {
+                "type": "complete",
+                "message": "需求分析流程完成",
+                "total_chunks": chunk_count,
+                "response_length": len(full_response)
+            }
+                
+        except Exception as e:
+            logger.error(f"LLM流式需求分析失败: {e}")
+            # 使用备用分析
+            yield {
+                "type": "progress",
+                "message": "AI服务异常，使用备用分析方法...",
+                "stage": "fallback"
+            }
+            
+            fallback_result = await self._fallback_analysis(project_description, analysis_type)
+            yield {
+                "type": "result",
+                "data": fallback_result,
+                "message": "需求分析完成（使用备用方法）"
+            }
+            
+            yield {
+                "type": "complete",
+                "message": "需求分析流程完成（备用模式）",
+                "fallback": True
+            }
+
     async def _fallback_analysis(self, project_description: str, analysis_type: str) -> Dict[str, Any]:
         """备用分析方法（当LLM不可用时）"""
         logger.info("使用备用分析方法")
@@ -378,29 +365,3 @@ class RequirementAnalysisAgent(LangGraphAgent):
             return "中"
         else:
             return "低"
-    
-    # ==================== 便捷方法 ====================
-    
-    def get_analysis_summary(self) -> str:
-        """获取分析结果摘要"""
-        if not self.has_context():
-            return "无分析结果"
-        
-        analysis_results = self.get_previous_analysis_results()
-        if "requirement_analysis" not in analysis_results:
-            return "需求分析未完成"
-        
-        result = analysis_results["requirement_analysis"]
-        if not isinstance(result, dict):
-            return "需求分析结果格式错误"
-        
-        # 提取项目概览
-        if "project_overview" in result:
-            overview = result["project_overview"]
-            if isinstance(overview, dict):
-                description = overview.get("description", "")
-                category = overview.get("category", "")
-                complexity = overview.get("complexity", "")
-                return f"项目: {description[:100]}... | 类别: {category} | 复杂度: {complexity}"
-        
-        return "需求分析已完成"
